@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Profile | SyncSpace</title>
+    <meta name="description" content="Manage your SyncSpace profile, view booking history, and update your account details.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="SyncSpace home">
+        <img src="assets/syncspace-logo-mark.png" alt="SyncSpace Coworking Space">
+      </a>
+      <nav class="main-nav" aria-label="Primary navigation">
+        <a href="index.html#about">About</a>
+        <a href="index.html#spaces">Spaces</a>
+        <a href="booking.html">Book a Space</a>
+        <a class="nav-cta" href="profile.html" data-auth-logged-in>My Profile</a>
+        <a class="nav-cta" href="#" data-auth-logged-out data-auth-login>Log in</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="profile-header">
+        <div>
+          <p class="eyebrow">Account</p>
+          <h1>My Profile</h1>
+        </div>
+      </section>
+
+      <section class="profile-content">
+        <div class="profile-card">
+          <div class="profile-avatar" id="profileAvatar">
+            <span id="avatarInitials">SS</span>
+          </div>
+          <div class="profile-info">
+            <h2 id="profileDisplayName"></h2>
+            <p id="profileDisplayEmail" class="profile-email"></p>
+            <div class="profile-actions">
+              <a class="button secondary" href="#" data-auth-logout>Log out</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="bookings-card">
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">Upcoming</p>
+              <h2>Upcoming Reservations</h2>
+            </div>
+          </div>
+          <div id="upcomingList" class="bookings-list">
+            <div class="empty-state">No upcoming reservations. <a href="booking.html">Book a room</a> to get started.</div>
+          </div>
+        </div>
+
+        <div class="bookings-card">
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">History</p>
+              <h2>Past Reservations</h2>
+            </div>
+          </div>
+          <div id="pastList" class="bookings-list">
+            <div class="empty-state">No past reservations yet.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>SyncSpace</span>
+      <span>Profile data is stored locally in your browser.</span>
+    </footer>
+
+    <div class="auth-modal-backdrop" id="authModal">
+      <div class="auth-modal">
+        <button class="auth-close" data-auth-close aria-label="Close">&times;</button>
+        <h2 id="authTitle">Log in to SyncSpace</h2>
+        <form id="authForm" data-mode="login">
+          <label id="authNameGroup" style="display:none">
+            <span>Full name</span>
+            <input type="text" id="authName" placeholder="Your full name">
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" id="authEmail" placeholder="you@example.com" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" id="authPassword" placeholder="Your password" required minlength="6">
+          </label>
+          <button class="button primary" type="submit" id="authSubmit">Log in</button>
+          <p class="form-message" id="authMessage" role="status"></p>
+          <p class="auth-toggle" id="authToggle">Don't have an account? <a href="#" data-auth-mode="signup">Sign up</a></p>
+        </form>
+      </div>
+    </div>
+
+    <script src="auth.js" defer></script>
+    <script src="profile.js" defer></script>
+  </body>
+</html>
