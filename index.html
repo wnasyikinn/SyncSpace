@@ -17,7 +17,9 @@
         <a href="#about">About</a>
         <a href="#spaces">Spaces</a>
         <a href="#benefits">Benefits</a>
-        <a class="nav-cta" href="booking.html">Book a Space</a>
+        <a href="booking.html">Book a Space</a>
+        <a class="nav-cta" href="profile.html" data-auth-logged-in>My Profile</a>
+        <a class="nav-cta" href="#" data-auth-logged-out data-auth-login>Log in</a>
       </nav>
     </header>
 
@@ -107,5 +109,30 @@
       <span>SyncSpace</span>
       <span>Flexible co-working spaces for focused, connected work.</span>
     </footer>
+    <div class="auth-modal-backdrop" id="authModal">
+      <div class="auth-modal">
+        <button class="auth-close" data-auth-close aria-label="Close">&times;</button>
+        <h2 id="authTitle">Log in to SyncSpace</h2>
+        <form id="authForm" data-mode="login">
+          <label id="authNameGroup" style="display:none">
+            <span>Full name</span>
+            <input type="text" id="authName" placeholder="Your full name">
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" id="authEmail" placeholder="you@example.com" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" id="authPassword" placeholder="Your password" required minlength="6">
+          </label>
+          <button class="button primary" type="submit" id="authSubmit">Log in</button>
+          <p class="form-message" id="authMessage" role="status"></p>
+          <p class="auth-toggle" id="authToggle">Don't have an account? <a href="#" data-auth-mode="signup">Sign up</a></p>
+        </form>
+      </div>
+    </div>
+
+    <script src="auth.js" defer></script>
   </body>
 </html>
