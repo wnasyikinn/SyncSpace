@@ -1,89 +1,63 @@
-const BOOKINGS_KEY = "syncspace_bookings";
-
-const upcomingList = document.querySelector("#upcomingList");
-const pastList = document.querySelector("#pastList");
-const profileDisplayName = document.querySelector("#profileDisplayName");
-const profileDisplayEmail = document.querySelector("#profileDisplayEmail");
-const avatarInitials = document.querySelector("#avatarInitials");
-
-function todayIso() {
-  const today = new Date();
-  const offsetDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
-  return offsetDate.toISOString().slice(0, 10);
-}
-
-function loadProfileInfo() {
-  const user = getCurrentUser();
+document.addEventListener("DOMContentLoaded", () => {
+  const user = getUser();
   if (!user) {
-    window.location.href = "index.html";
+    window.location.href = "booking.html";
     return;
   }
-  profileDisplayName.textContent = user.name;
-  profileDisplayEmail.textContent = user.email;
-  updateAvatar(user.name);
-}
 
-function updateAvatar(name) {
-  if (!name || !name.trim()) {
-    avatarInitials.textContent = "SS";
-    return;
+  document.querySelector("#profileName").textContent = user.name;
+  document.querySelector("#profileEmail").textContent = user.email;
+  document.querySelector("#profileAvatar").textContent = user.name.charAt(0).toUpperCase();
+
+  renderReservations();
+});
+
+function renderReservations() {
+  const bookings = getUserBookings();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const upcoming = bookings.filter((b) => b.endDate >= today);
+  const past = bookings.filter((b) => b.endDate < today);
+
+  upcoming.sort((a, b) => a.startDate.localeCompare(b.startDate));
+  past.sort((a, b) => b.startDate.localeCompare(a.startDate));
+
+  const upcomingList = document.querySelector("#upcomingList");
+  const pastList = document.querySelector("#pastList");
+
+  if (upcoming.length) {
+    upcomingList.innerHTML = upcoming.map(reservationCard).join("");
   }
-  const parts = name.trim().split(/\s+/);
-  const initials = parts.length >= 2
-    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-    : parts[0].slice(0, 2).toUpperCase();
-  avatarInitials.textContent = initials;
+
+  if (past.length) {
+    pastList.innerHTML = past.map(reservationCard).join("");
+  }
 }
 
-function getUserBookings() {
-  const user = getCurrentUser();
-  if (!user) return [];
-  const all = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || "[]");
-  return all.filter(b => b.userId === user.id);
-}
+function reservationCard(booking) {
+  const dateText = booking.startDate === booking.endDate
+    ? booking.startDate
+    : `${booking.startDate} to ${booking.endDate}`;
 
-function renderBookingItem(b) {
-  const isPast = isBookingPast(b);
   return `
-    <div class="booking-item ${isPast ? "is-past" : ""}">
-      <div class="booking-item-header">
-        <h3>${b.room}</h3>
-        <span class="pill ${isPast ? "unavailable" : ""}">${isPast ? "Completed" : b.status || "Confirmed"}</span>
+    <div class="reservation-card">
+      <div class="reservation-card-top">
+        <div>
+          <span class="pill">${escapeHtml(booking.roomType || "Room")}</span>
+          <h3>${escapeHtml(booking.room)}</h3>
+        </div>
       </div>
-      <div class="booking-item-details">
-        <span><strong>Date:</strong> ${b.date}</span>
-        <span><strong>Time:</strong> ${b.time}</span>
-        <span><strong>Total:</strong> ${b.total}</span>
-      </div>
+      <dl class="reservation-details">
+        <div><dt>Date</dt><dd>${escapeHtml(dateText)}</dd></div>
+        <div><dt>Time</dt><dd>${escapeHtml(booking.time)}</dd></div>
+        <div><dt>Total</dt><dd>${escapeHtml(booking.total)}</dd></div>
+      </dl>
     </div>
   `;
 }
 
-function isBookingPast(b) {
-  const bookingEnd = b.endDate || b.startDate || "";
-  if (!bookingEnd) return false;
-  return bookingEnd < todayIso();
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
 }
-
-function renderBookings() {
-  const bookings = getUserBookings();
-  const upcoming = bookings.filter(b => !isBookingPast(b));
-  const past = bookings.filter(b => isBookingPast(b));
-
-  if (upcoming.length) {
-    upcomingList.innerHTML = upcoming.reverse().map(renderBookingItem).join("");
-  } else {
-    upcomingList.innerHTML = '<div class="empty-state">No upcoming reservations. <a href="booking.html">Book a room</a> to get started.</div>';
-  }
-
-  if (past.length) {
-    pastList.innerHTML = past.reverse().map(renderBookingItem).join("");
-  } else {
-    pastList.innerHTML = '<div class="empty-state">No past reservations yet.</div>';
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  loadProfileInfo();
-  renderBookings();
-});
