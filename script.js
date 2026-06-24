@@ -169,14 +169,11 @@ function renderRooms() {
 }
 
 function selectRoom(roomId) {
-  if (!requireAuth()) return;
-
   selectedRoom = rooms.find((room) => room.id === roomId);
   if (!selectedRoom) return;
 
   selectedRoomName.textContent = selectedRoom.name;
   updateSummary();
-  updateBookingAuthInfo();
   formMessage.textContent = "";
   document.querySelector("#bookingPanel").scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -187,29 +184,11 @@ function updateSummary() {
   summaryTotal.textContent = selectedRoom ? `${formatPrice(selectedRoom.price * getBookingDays())} (${getBookingDays()} day${getBookingDays() === 1 ? "" : "s"})` : "-";
 }
 
-function updateBookingAuthInfo() {
-  const info = document.querySelector("#bookingAuthInfo");
-  if (!info) return;
-  const user = getCurrentUser();
-  if (user) {
-    info.innerHTML = `<p>Booking as <strong>${user.name}</strong></p>`;
-    info.style.display = "";
-  } else {
-    info.style.display = "none";
-  }
-}
-
-function onAuthSuccess() {
-  updateBookingAuthInfo();
-}
-
 startDate.min = todayIso();
 endDate.min = todayIso();
 startDate.value = todayIso();
 endDate.value = addDays(todayIso(), 1);
 renderRooms();
-
-document.addEventListener("DOMContentLoaded", updateBookingAuthInfo);
 
 document.querySelector("#filters").addEventListener("input", (event) => {
   if (event.target === timeSlot && selectedRoom) {
@@ -242,19 +221,32 @@ document.querySelector("#scrollRight").addEventListener("click", () => {
   roomStrip.scrollBy({ left: 380, behavior: "smooth" });
 });
 
+function prefillFromUser() {
+  const user = getUser();
+  if (user) {
+    document.querySelector("#customerName").value = user.name;
+    document.querySelector("#customerEmail").value = user.email;
+  }
+}
+
 bookingForm.addEventListener("submit", (event) => {
   event.preventDefault();
-
-  if (!requireAuth()) return;
 
   if (!selectedRoom) {
     formMessage.textContent = "Select a room before submitting your request.";
     return;
   }
 
-  const user = getCurrentUser();
+  const user = getUser();
+  if (!user) {
+    showAuthModal(() => {
+      prefillFromUser();
+      formMessage.textContent = "You are now logged in. Click Confirm booking again.";
+    });
+    return;
+  }
+
   const booking = {
-    userId: user.id,
     room: selectedRoom.name,
     roomType: selectedRoom.type,
     startDate: startDate.value,
@@ -262,16 +254,20 @@ bookingForm.addEventListener("submit", (event) => {
     date: formatDateRange(),
     time: timeSlot.value,
     total: formatPrice(selectedRoom.price * getBookingDays()),
-    status: "Confirmed",
-    bookedAt: new Date().toISOString()
+    name: user.name,
+    email: user.email
   };
 
-  const bookings = JSON.parse(localStorage.getItem("syncspace_bookings") || "[]");
-  bookings.push(booking);
-  localStorage.setItem("syncspace_bookings", JSON.stringify(bookings));
-
+  saveBooking(booking);
   formMessage.textContent = `Booking confirmed for ${booking.room}. Total: ${booking.total}.`;
-  selectedRoom = null;
-  selectedRoomName.textContent = "Choose a room to continue";
-  updateSummary();
+  bookingForm.reset();
+});
+
+document.querySelector("#shareStories").addEventListener("click", () => {
+  const url = `${window.location.origin}${window.location.pathname}#stories`;
+  const btn = document.querySelector("#shareStories");
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = "Link copied!";
+    setTimeout(() => { btn.innerHTML = '<span class="share-icon">&#x1f517;</span> Share'; }, 2000);
+  });
 });
