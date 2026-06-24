@@ -7,6 +7,7 @@
     <meta name="description" content="Browse available SyncSpace rooms by date and time, then submit a booking request online.">
     <link rel="preconnect" href="https://images.unsplash.com">
     <link rel="stylesheet" href="styles.css">
+    <script src="auth.js" defer></script>
     <script src="script.js" defer></script>
   </head>
   <body>
@@ -18,7 +19,9 @@
         <a href="index.html#about">About</a>
         <a href="index.html#spaces">Spaces</a>
         <a href="index.html#benefits">Benefits</a>
-        <a class="nav-cta" href="booking.html">Book a Space</a>
+        <a href="booking.html">Book a Space</a>
+        <a class="nav-cta" href="profile.html" data-auth-logged-in>My Profile</a>
+        <a class="nav-cta" href="#" data-auth-logged-out data-auth-login>Log in</a>
       </nav>
     </header>
 
@@ -104,14 +107,9 @@
           </dl>
         </div>
         <form class="booking-form" id="bookingForm">
-          <label>
-            <span>Name</span>
-            <input type="text" id="customerName" placeholder="Your name" required>
-          </label>
-          <label>
-            <span>Email</span>
-            <input type="email" id="customerEmail" placeholder="you@example.com" required>
-          </label>
+          <div class="booking-auth-info full-width" id="bookingAuthInfo">
+            <p>Booking as <strong data-auth-user-name></strong></p>
+          </div>
           <button class="button primary" type="submit">Confirm booking</button>
           <p class="form-message" id="formMessage" role="status"></p>
         </form>
@@ -129,6 +127,30 @@
         </div>
       </section>
     </main>
+
+    <div class="auth-modal-backdrop" id="authModal">
+      <div class="auth-modal">
+        <button class="auth-close" data-auth-close aria-label="Close">&times;</button>
+        <h2 id="authTitle">Log in to SyncSpace</h2>
+        <form id="authForm" data-mode="login">
+          <label id="authNameGroup" style="display:none">
+            <span>Full name</span>
+            <input type="text" id="authName" placeholder="Your full name">
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" id="authEmail" placeholder="you@example.com" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" id="authPassword" placeholder="Your password" required minlength="6">
+          </label>
+          <button class="button primary" type="submit" id="authSubmit">Log in</button>
+          <p class="form-message" id="authMessage" role="status"></p>
+          <p class="auth-toggle" id="authToggle">Don't have an account? <a href="#" data-auth-mode="signup">Sign up</a></p>
+        </form>
+      </div>
+    </div>
 
     <footer class="site-footer">
       <span>SyncSpace</span>
