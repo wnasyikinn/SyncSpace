@@ -1,169 +1,186 @@
-const AUTH_KEY = "syncspace_auth";
-const USERS_KEY = "syncspace_users";
+const AUTH_KEY = "syncspace_user";
+const BOOKINGS_KEY = "syncspace_bookings";
 
-function getUsers() {
-  return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_KEY));
+  } catch {
+    return null;
+  }
 }
 
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-function getCurrentUser() {
-  return JSON.parse(localStorage.getItem(AUTH_KEY) || "null");
-}
-
-function setCurrentUser(user) {
+function setUser(user) {
   localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-  updateAuthUI();
 }
 
-function logout() {
+function logoutUser() {
   localStorage.removeItem(AUTH_KEY);
-  updateAuthUI();
-  if (window.location.pathname.includes("profile.html")) {
-    window.location.href = "index.html";
+}
+
+function getBookings() {
+  try {
+    return JSON.parse(localStorage.getItem(BOOKINGS_KEY)) || [];
+  } catch {
+    return [];
   }
 }
 
-function signup(name, email, password) {
-  const users = getUsers();
-  if (users.find(u => u.email === email)) {
-    return { ok: false, message: "An account with this email already exists." };
+function saveBooking(booking) {
+  const bookings = getBookings();
+  booking.id = Date.now().toString(36);
+  booking.createdAt = new Date().toISOString();
+  bookings.push(booking);
+  localStorage.setItem(BOOKINGS_KEY, JSON.stringify(bookings));
+  return booking;
+}
+
+function getUserBookings() {
+  const user = getUser();
+  if (!user) return [];
+  return getBookings().filter((b) => b.email === user.email);
+}
+
+function showAuthModal(onSuccess) {
+  if (document.querySelector(".auth-overlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "auth-overlay";
+  overlay.innerHTML = `
+    <div class="auth-modal">
+      <button type="button" class="auth-close" aria-label="Close">&times;</button>
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-tab="login">Log in</button>
+        <button type="button" class="auth-tab" data-tab="signup">Sign up</button>
+      </div>
+      <form class="auth-form" id="loginForm">
+        <label>
+          <span>Email</span>
+          <input type="email" id="authEmail" placeholder="you@example.com" required>
+        </label>
+        <label>
+          <span>Password</span>
+          <input type="password" id="authPassword" placeholder="Your password" required minlength="6">
+        </label>
+        <button class="button primary" type="submit">Log in</button>
+        <p class="auth-message" id="authMessage" role="status"></p>
+      </form>
+      <form class="auth-form" id="signupForm" style="display:none">
+        <label>
+          <span>Full name</span>
+          <input type="text" id="signupName" placeholder="Your name" required>
+        </label>
+        <label>
+          <span>Email</span>
+          <input type="email" id="signupEmail" placeholder="you@example.com" required>
+        </label>
+        <label>
+          <span>Password</span>
+          <input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6">
+        </label>
+        <button class="button primary" type="submit">Create account</button>
+        <p class="auth-message" id="signupMessage" role="status"></p>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay.querySelector(".auth-close").addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  overlay.querySelectorAll(".auth-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      overlay.querySelectorAll(".auth-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      const isLogin = tab.dataset.tab === "login";
+      overlay.querySelector("#loginForm").style.display = isLogin ? "" : "none";
+      overlay.querySelector("#signupForm").style.display = isLogin ? "none" : "";
+    });
+  });
+
+  const USERS_KEY = "syncspace_users";
+  function getUsers() {
+    try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }
+    catch { return []; }
   }
-  const user = { id: Date.now().toString(), name, email, password };
-  users.push(user);
-  saveUsers(users);
-  setCurrentUser({ id: user.id, name: user.name, email: user.email });
-  return { ok: true };
-}
 
-function login(email, password) {
-  const users = getUsers();
-  const user = users.find(u => u.email === email && u.password === password);
-  if (!user) {
-    return { ok: false, message: "Invalid email or password." };
-  }
-  setCurrentUser({ id: user.id, name: user.name, email: user.email });
-  return { ok: true };
-}
+  overlay.querySelector("#signupForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = overlay.querySelector("#signupName").value.trim();
+    const email = overlay.querySelector("#signupEmail").value.trim().toLowerCase();
+    const password = overlay.querySelector("#signupPassword").value;
+    const msg = overlay.querySelector("#signupMessage");
 
-function isLoggedIn() {
-  return getCurrentUser() !== null;
-}
+    const users = getUsers();
+    if (users.find((u) => u.email === email)) {
+      msg.textContent = "An account with this email already exists.";
+      return;
+    }
 
-function requireAuth() {
-  if (!isLoggedIn()) {
-    openAuthModal("login");
-    return false;
-  }
-  return true;
-}
+    users.push({ name, email, password });
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    setUser({ name, email });
+    overlay.remove();
+    updateAuthUI();
+    if (onSuccess) onSuccess();
+  });
 
-function openAuthModal(mode) {
-  const modal = document.querySelector("#authModal");
-  if (!modal) return;
-  modal.classList.add("is-open");
-  switchAuthMode(mode || "login");
-}
+  overlay.querySelector("#loginForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = overlay.querySelector("#authEmail").value.trim().toLowerCase();
+    const password = overlay.querySelector("#authPassword").value;
+    const msg = overlay.querySelector("#authMessage");
 
-function closeAuthModal() {
-  const modal = document.querySelector("#authModal");
-  if (!modal) return;
-  modal.classList.remove("is-open");
-  const msg = document.querySelector("#authMessage");
-  if (msg) msg.textContent = "";
-}
+    const users = getUsers();
+    const found = users.find((u) => u.email === email && u.password === password);
+    if (!found) {
+      msg.textContent = "Invalid email or password.";
+      return;
+    }
 
-function switchAuthMode(mode) {
-  const title = document.querySelector("#authTitle");
-  const submitBtn = document.querySelector("#authSubmit");
-  const toggle = document.querySelector("#authToggle");
-  const nameField = document.querySelector("#authNameGroup");
-  const form = document.querySelector("#authForm");
-
-  if (!title) return;
-
-  if (mode === "signup") {
-    title.textContent = "Create your account";
-    submitBtn.textContent = "Sign up";
-    toggle.innerHTML = 'Already have an account? <a href="#" data-auth-mode="login">Log in</a>';
-    nameField.style.display = "";
-    form.dataset.mode = "signup";
-  } else {
-    title.textContent = "Log in to SyncSpace";
-    submitBtn.textContent = "Log in";
-    toggle.innerHTML = 'Don\'t have an account? <a href="#" data-auth-mode="signup">Sign up</a>';
-    nameField.style.display = "none";
-    form.dataset.mode = "login";
-  }
-  const msg = document.querySelector("#authMessage");
-  if (msg) msg.textContent = "";
+    setUser({ name: found.name, email: found.email });
+    overlay.remove();
+    updateAuthUI();
+    if (onSuccess) onSuccess();
+  });
 }
 
 function updateAuthUI() {
-  const user = getCurrentUser();
-  document.querySelectorAll("[data-auth-logged-in]").forEach(el => {
-    el.style.display = user ? "" : "none";
-  });
-  document.querySelectorAll("[data-auth-logged-out]").forEach(el => {
-    el.style.display = user ? "none" : "";
-  });
-  document.querySelectorAll("[data-auth-user-name]").forEach(el => {
-    el.textContent = user ? user.name : "";
-  });
+  const user = getUser();
+  const profileLink = document.querySelector("#navProfile");
+  const logoutBtn = document.querySelector("#navLogout");
+  const loginBtn = document.querySelector("#navLogin");
+
+  if (profileLink) {
+    profileLink.style.display = user ? "" : "none";
+    if (user) profileLink.textContent = user.name.split(" ")[0];
+  }
+  if (logoutBtn) {
+    logoutBtn.style.display = user ? "" : "none";
+  }
+  if (loginBtn) {
+    loginBtn.style.display = user ? "none" : "";
+  }
 }
 
-function initAuth() {
+document.addEventListener("DOMContentLoaded", () => {
   updateAuthUI();
 
-  const form = document.querySelector("#authForm");
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const mode = form.dataset.mode;
-      const email = document.querySelector("#authEmail").value.trim();
-      const password = document.querySelector("#authPassword").value;
-      const msg = document.querySelector("#authMessage");
-
-      if (mode === "signup") {
-        const name = document.querySelector("#authName").value.trim();
-        if (!name) { msg.textContent = "Please enter your name."; return; }
-        const result = signup(name, email, password);
-        if (!result.ok) { msg.textContent = result.message; return; }
-      } else {
-        const result = login(email, password);
-        if (!result.ok) { msg.textContent = result.message; return; }
-      }
-      closeAuthModal();
-      if (typeof onAuthSuccess === "function") onAuthSuccess();
-    });
-  }
-
-  const modal = document.querySelector("#authModal");
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeAuthModal();
-      const modeLink = e.target.closest("[data-auth-mode]");
-      if (modeLink) {
-        e.preventDefault();
-        switchAuthMode(modeLink.dataset.authMode);
+  const logoutBtn = document.querySelector("#navLogout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      logoutUser();
+      updateAuthUI();
+      if (window.location.pathname.includes("profile")) {
+        window.location.href = "index.html";
       }
     });
   }
 
-  document.querySelectorAll("[data-auth-login]").forEach(el => {
-    el.addEventListener("click", (e) => { e.preventDefault(); openAuthModal("login"); });
-  });
-  document.querySelectorAll("[data-auth-signup]").forEach(el => {
-    el.addEventListener("click", (e) => { e.preventDefault(); openAuthModal("signup"); });
-  });
-  document.querySelectorAll("[data-auth-logout]").forEach(el => {
-    el.addEventListener("click", (e) => { e.preventDefault(); logout(); });
-  });
-  document.querySelectorAll("[data-auth-close]").forEach(el => {
-    el.addEventListener("click", (e) => { e.preventDefault(); closeAuthModal(); });
-  });
-}
-
-document.addEventListener("DOMContentLoaded", initAuth);
+  const loginBtn = document.querySelector("#navLogin");
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => showAuthModal());
+  }
+});
