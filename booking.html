@@ -8,11 +8,11 @@
       content="width=device-width, initial-scale=1"
     >
 
-    <title>Book a Space | SyncSpace</title>
+    <title>Book a Workspace | SyncSpace</title>
 
     <meta
       name="description"
-      content="Browse available SyncSpace rooms by date and time, then submit a booking request online."
+      content="Check workspace availability by date, time, type, and capacity before continuing to payment."
     >
 
     <link
@@ -43,13 +43,22 @@
         class="main-nav"
         aria-label="Primary navigation"
       >
-        <a href="index.html#about">About</a>
-        <a href="index.html#spaces">Spaces</a>
-        <a href="index.html#benefits">Benefits</a>
+        <a href="index.html#about">
+          About
+        </a>
+
+        <a href="index.html#spaces">
+          Spaces
+        </a>
+
+        <a href="index.html#benefits">
+          Benefits
+        </a>
 
         <a
           class="nav-cta"
           href="booking.html"
+          aria-current="page"
         >
           Book a Space
         </a>
@@ -85,14 +94,25 @@
     <main>
       <section class="booking-header">
         <div>
-          <p class="eyebrow">Booking</p>
-          <h1>Reserve your workspace</h1>
+          <p class="eyebrow">
+            Workspace booking
+          </p>
+
+          <h1>
+            Find your workspace
+          </h1>
+
+          <p>
+            Select your preferred date, time, workspace type,
+            and number of people. SyncSpace will check the
+            available workspace units before you continue to payment.
+          </p>
         </div>
       </section>
 
       <section
         class="booking-shell"
-        aria-label="Room booking interface"
+        aria-label="Workspace availability and booking interface"
       >
         <form
           class="filters"
@@ -100,7 +120,7 @@
         >
           <fieldset
             class="filter-group date-group"
-            aria-label="Date range"
+            aria-label="Reservation date range"
           >
             <label>
               <span>Start date</span>
@@ -127,7 +147,7 @@
 
           <fieldset
             class="filter-group time-group"
-            aria-label="Time"
+            aria-label="Reservation time"
           >
             <label>
               <span>Time</span>
@@ -157,14 +177,14 @@
           </fieldset>
 
           <label class="room-type-filter">
-            <span>Room type</span>
+            <span>Workspace type</span>
 
             <select
               id="roomType"
               name="roomType"
             >
               <option value="all">
-                All room types
+                All workspace types
               </option>
 
               <option value="Hot Desk">
@@ -186,7 +206,7 @@
           </label>
 
           <label class="pax-filter">
-            <span>Pax</span>
+            <span>Number of people</span>
 
             <input
               type="number"
@@ -195,6 +215,7 @@
               min="1"
               max="80"
               value="2"
+              required
             >
           </label>
 
@@ -202,26 +223,33 @@
             <input
               type="checkbox"
               id="availableOnly"
+              checked
             >
 
-            <span>Hide unavailable</span>
+            <span>
+              Show available only
+            </span>
           </label>
         </form>
 
         <div class="room-toolbar">
-          <p id="roomCount">
-            Showing available rooms
+          <p
+            id="roomCount"
+            role="status"
+            aria-live="polite"
+          >
+            Checking available workspaces...
           </p>
 
           <div
             class="scroll-actions"
-            aria-label="Room carousel controls"
+            aria-label="Workspace carousel controls"
           >
             <button
               type="button"
               class="icon-button"
               id="scrollLeft"
-              aria-label="Scroll rooms left"
+              aria-label="Scroll workspaces left"
             >
               ‹
             </button>
@@ -230,7 +258,7 @@
               type="button"
               class="icon-button"
               id="scrollRight"
-              aria-label="Scroll rooms right"
+              aria-label="Scroll workspaces right"
             >
               ›
             </button>
@@ -241,18 +269,26 @@
           class="room-strip"
           id="roomStrip"
           aria-live="polite"
-        ></div>
+          aria-busy="true"
+        >
+          <div class="empty-state">
+            Loading workspace availability...
+          </div>
+        </div>
       </section>
 
       <section
         class="booking-panel"
         id="bookingPanel"
+        aria-label="Selected workspace and customer details"
       >
         <div>
-          <p class="eyebrow">Selected room</p>
+          <p class="eyebrow">
+            Selected workspace
+          </p>
 
           <h2 id="selectedRoomName">
-            Choose a room to continue
+            Choose a workspace to continue
           </h2>
 
           <dl
@@ -274,6 +310,11 @@
               <dd id="summaryTotal">-</dd>
             </div>
           </dl>
+
+          <p>
+            The displayed total is an estimate. Your reservation
+            will remain pending until payment is completed.
+          </p>
         </div>
 
         <form
@@ -281,24 +322,26 @@
           id="bookingForm"
         >
           <label>
-            <span>Name</span>
+            <span>Customer name</span>
 
             <input
               type="text"
               id="customerName"
               placeholder="Log in to continue"
+              autocomplete="name"
               readonly
               required
             >
           </label>
 
           <label>
-            <span>Email</span>
+            <span>Customer email</span>
 
             <input
               type="email"
               id="customerEmail"
               placeholder="Log in to continue"
+              autocomplete="email"
               readonly
               required
             >
@@ -308,7 +351,7 @@
             class="button primary"
             type="submit"
           >
-            Confirm booking
+            Continue to payment
           </button>
 
           <p
@@ -326,17 +369,28 @@
       >
         <div class="social-heading">
           <div>
-            <p class="eyebrow">Social proof</p>
-            <h2>Workspace stories</h2>
+            <p class="eyebrow">
+              Social proof
+            </p>
+
+            <h2>
+              Workspace stories
+            </h2>
           </div>
 
           <button
             type="button"
             class="button secondary share-btn"
             id="shareStories"
-            aria-label="Copy link to Workspace stories"
+            aria-label="Share SyncSpace workspace stories"
           >
-            <span class="share-icon">&#x1f517;</span>
+            <span
+              class="share-icon"
+              aria-hidden="true"
+            >
+              &#x1f517;
+            </span>
+
             Share
           </button>
         </div>
@@ -358,7 +412,8 @@
       <span>SyncSpace</span>
 
       <span>
-        Account and booking data are managed through Supabase.
+        Account, workspace availability, and reservation
+        data are managed through Supabase.
       </span>
     </footer>
 
@@ -366,6 +421,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
-    <script src="script.js"></script>
+    <script src="booking.js"></script>
   </body>
 </html>
