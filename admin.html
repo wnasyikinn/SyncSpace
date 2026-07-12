@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    >
+
+    <title>Administration | SyncSpace</title>
+
+    <meta
+      name="description"
+      content="Manage SyncSpace workspace inventory, reservations, payments, cancellations, and refunds."
+    >
+
+    <link
+      rel="stylesheet"
+      href="styles.css"
+    >
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a
+        class="brand"
+        href="index.html"
+        aria-label="SyncSpace home"
+      >
+        <img
+          src="assets/syncspace-logo-mark.png"
+          alt="SyncSpace Coworking Space"
+        >
+      </a>
+
+      <nav
+        class="main-nav"
+        aria-label="Primary navigation"
+      >
+        <a href="index.html#about">
+          About
+        </a>
+
+        <a href="index.html#spaces">
+          Spaces
+        </a>
+
+        <a href="index.html#how-it-works">
+          How It Works
+        </a>
+
+        <a
+          class="nav-cta"
+          href="booking.html"
+        >
+          Book a Space
+        </a>
+
+        <a
+          href="profile.html"
+          id="navProfile"
+          class="nav-profile"
+          style="display: none"
+        >
+          Profile
+        </a>
+
+        <a
+          href="admin.html"
+          id="navAdmin"
+          class="nav-profile"
+          style="display: none"
+          aria-current="page"
+        >
+          Admin
+        </a>
+
+        <button
+          type="button"
+          id="navLogin"
+          class="nav-login"
+        >
+          Log in
+        </button>
+
+        <button
+          type="button"
+          id="navLogout"
+          class="nav-logout"
+          style="display: none"
+        >
+          Log out
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="profile-header admin-header">
+        <div>
+          <p class="eyebrow">
+            Administration
+          </p>
+
+          <h1>
+            SyncSpace Management
+          </h1>
+
+          <p>
+            Manage workspace inventory, monitor reservations and
+            payments, and process customer cancellation and refund
+            requests.
+          </p>
+        </div>
+
+        <div class="admin-identity">
+          <span class="pill status-admin">
+            Administrator
+          </span>
+
+          <strong id="adminDisplayName">
+            Loading administrator...
+          </strong>
+        </div>
+      </section>
+
+      <section
+        class="admin-content"
+        id="adminContent"
+        aria-busy="true"
+      >
+        <p
+          class="form-message admin-page-message"
+          id="adminPageMessage"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+        <nav
+          class="admin-section-nav"
+          aria-label="Administration sections"
+        >
+          <a href="#adminOverview">
+            Overview
+          </a>
+
+          <a href="#inventoryManagement">
+            Inventory
+          </a>
+
+          <a href="#bookingManagement">
+            Bookings
+          </a>
+
+          <a href="#paymentManagement">
+            Payments
+          </a>
+
+          <a href="#refundManagement">
+            Refunds
+          </a>
+        </nav>
+
+        <section
+          class="reservation-overview"
+          id="adminOverview"
+          aria-labelledby="adminOverviewTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                System overview
+              </p>
+
+              <h2 id="adminOverviewTitle">
+                Current activity
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              class="button secondary"
+              id="refreshAdminButton"
+            >
+              Refresh data
+            </button>
+          </div>
+
+          <div class="reservation-stats">
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="activeWorkspaceCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Active workspace units
+              </strong>
+
+              <p>
+                Workspace units currently visible to customers.
+              </p>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="confirmedBookingCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Upcoming bookings
+              </strong>
+
+              <p>
+                Paid and confirmed reservations that have not ended.
+              </p>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="pendingPaymentAdminCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Pending payments
+              </strong>
+
+              <p>
+                Temporary reservations awaiting customer payment.
+              </p>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="openRefundCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Open refund requests
+              </strong>
+
+              <p>
+                Refund requests awaiting an administrative decision.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card admin-section"
+          id="inventoryManagement"
+          aria-labelledby="inventoryTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Workspace inventory
+              </p>
+
+              <h2 id="inventoryTitle">
+                Workspace Units
+              </h2>
+
+              <p>
+                Add workspace units, edit their capacity and price,
+                or remove them temporarily from customer searches.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="button primary"
+              id="addWorkspaceButton"
+            >
+              Add workspace unit
+            </button>
+          </div>
+
+          <div class="admin-toolbar">
+            <label>
+              <span>Search inventory</span>
+
+              <input
+                type="search"
+                id="inventorySearch"
+                placeholder="Search name, unit code, or type"
+              >
+            </label>
+
+            <label>
+              <span>Availability status</span>
+
+              <select id="inventoryStatusFilter">
+                <option value="all">
+                  All units
+                </option>
+
+                <option value="active">
+                  Active
+                </option>
+
+                <option value="inactive">
+                  Inactive
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div
+            class="admin-record-list"
+            id="inventoryList"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading workspace inventory...
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card admin-section"
+          id="bookingManagement"
+          aria-labelledby="bookingManagementTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Reservation monitoring
+              </p>
+
+              <h2 id="bookingManagementTitle">
+                All Bookings
+              </h2>
+
+              <p>
+                Monitor pending, confirmed, completed, cancelled,
+                and expired reservations.
+              </p>
+            </div>
+          </div>
+
+          <div class="admin-toolbar">
+            <label>
+              <span>Search bookings</span>
+
+              <input
+                type="search"
+                id="bookingSearch"
+                placeholder="Search reference, customer, or workspace"
+              >
+            </label>
+
+            <label>
+              <span>Booking status</span>
+
+              <select id="bookingStatusFilter">
+                <option value="all">
+                  All statuses
+                </option>
+
+                <option value="pending_payment">
+                  Pending payment
+                </option>
+
+                <option value="confirmed">
+                  Confirmed
+                </option>
+
+                <option value="completed">
+                  Completed
+                </option>
+
+                <option value="cancel_requested">
+                  Cancellation requested
+                </option>
+
+                <option value="cancelled">
+                  Cancelled
+                </option>
+
+                <option value="expired">
+                  Expired
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div
+            class="admin-record-list"
+            id="adminBookingList"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading bookings...
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card admin-section"
+          id="paymentManagement"
+          aria-labelledby="paymentManagementTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Transaction monitoring
+              </p>
+
+              <h2 id="paymentManagementTitle">
+                Payments
+              </h2>
+
+              <p>
+                Review simulated payments, failed payment holds,
+                and refund-related payment statuses.
+              </p>
+            </div>
+          </div>
+
+          <div class="admin-toolbar">
+            <label>
+              <span>Search payments</span>
+
+              <input
+                type="search"
+                id="paymentSearch"
+                placeholder="Search payment or booking reference"
+              >
+            </label>
+
+            <label>
+              <span>Payment status</span>
+
+              <select id="paymentStatusFilter">
+                <option value="all">
+                  All statuses
+                </option>
+
+                <option value="pending">
+                  Pending
+                </option>
+
+                <option value="paid">
+                  Paid
+                </option>
+
+                <option value="failed">
+                  Failed
+                </option>
+
+                <option value="refund_pending">
+                  Refund pending
+                </option>
+
+                <option value="refunded">
+                  Refunded
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div
+            class="admin-record-list"
+            id="adminPaymentList"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading payments...
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card admin-section"
+          id="refundManagement"
+          aria-labelledby="refundManagementTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Customer requests
+              </p>
+
+              <h2 id="refundManagementTitle">
+                Cancellation and Refund Requests
+              </h2>
+
+              <p>
+                Approve, reject, process, or complete customer refund
+                requests. Completing a refund cancels the booking and
+                marks its payment as refunded.
+              </p>
+            </div>
+          </div>
+
+          <div class="admin-toolbar">
+            <label>
+              <span>Search refund requests</span>
+
+              <input
+                type="search"
+                id="refundSearch"
+                placeholder="Search customer, workspace, or reference"
+              >
+            </label>
+
+            <label>
+              <span>Refund status</span>
+
+              <select id="refundStatusFilter">
+                <option value="all">
+                  All statuses
+                </option>
+
+                <option value="requested">
+                  Requested
+                </option>
+
+                <option value="approved">
+                  Approved
+                </option>
+
+                <option value="processing">
+                  Processing
+                </option>
+
+                <option value="refunded">
+                  Refunded
+                </option>
+
+                <option value="rejected">
+                  Rejected
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div
+            class="admin-record-list"
+            id="adminRefundList"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading refund requests...
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div
+      class="admin-modal-overlay"
+      id="workspaceModal"
+      hidden
+    >
+      <section
+        class="admin-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="workspaceFormTitle"
+      >
+        <button
+          type="button"
+          class="auth-close"
+          id="closeWorkspaceModal"
+          aria-label="Close workspace form"
+        >
+          &times;
+        </button>
+
+        <p class="eyebrow">
+          Workspace inventory
+        </p>
+
+        <h2 id="workspaceFormTitle">
+          Add workspace unit
+        </h2>
+
+        <form
+          class="admin-form"
+          id="workspaceForm"
+        >
+          <input
+            type="hidden"
+            id="workspaceExistingId"
+          >
+
+          <label>
+            <span>Workspace type</span>
+
+            <select
+              id="workspaceTypeId"
+              required
+            ></select>
+          </label>
+
+          <label>
+            <span>Unit code</span>
+
+            <input
+              type="text"
+              id="workspaceUnitCode"
+              maxlength="30"
+              placeholder="Example: SF-03"
+              required
+            >
+          </label>
+
+          <label>
+            <span>Workspace name</span>
+
+            <input
+              type="text"
+              id="workspaceName"
+              maxlength="100"
+              placeholder="Example: Studio Four"
+              required
+            >
+          </label>
+
+          <label>
+            <span>Description</span>
+
+            <textarea
+              id="workspaceDescription"
+              rows="3"
+              maxlength="500"
+              required
+            ></textarea>
+          </label>
+
+          <label>
+            <span>Layout and facilities</span>
+
+            <textarea
+              id="workspaceLayout"
+              rows="3"
+              maxlength="500"
+              required
+            ></textarea>
+          </label>
+
+          <div class="payment-form-row">
+            <label>
+              <span>Maximum capacity</span>
+
+              <input
+                type="number"
+                id="workspaceCapacity"
+                min="1"
+                max="500"
+                required
+              >
+            </label>
+
+            <label>
+              <span>Price per day (RM)</span>
+
+              <input
+                type="number"
+                id="workspacePrice"
+                min="0"
+                step="0.01"
+                required
+              >
+            </label>
+          </div>
+
+          <label>
+            <span>Image URL</span>
+
+            <input
+              type="url"
+              id="workspaceImageUrl"
+              placeholder="https://..."
+            >
+          </label>
+
+          <label>
+            <span>Display order</span>
+
+            <input
+              type="number"
+              id="workspaceDisplayOrder"
+              min="0"
+              value="0"
+              required
+            >
+          </label>
+
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              id="workspaceActive"
+              checked
+            >
+
+            <span>
+              Active and visible to customers
+            </span>
+          </label>
+
+          <div class="reservation-card-actions">
+            <button
+              type="button"
+              class="button secondary"
+              id="cancelWorkspaceForm"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="button primary"
+              id="saveWorkspaceButton"
+            >
+              Save workspace
+            </button>
+          </div>
+
+          <p
+            class="form-message"
+            id="workspaceFormMessage"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
+    </div>
+
+    <div
+      class="admin-modal-overlay"
+      id="refundActionModal"
+      hidden
+    >
+      <section
+        class="admin-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="refundActionTitle"
+      >
+        <button
+          type="button"
+          class="auth-close"
+          id="closeRefundModal"
+          aria-label="Close refund action"
+        >
+          &times;
+        </button>
+
+        <p class="eyebrow">
+          Refund processing
+        </p>
+
+        <h2 id="refundActionTitle">
+          Process refund request
+        </h2>
+
+        <p id="refundActionDescription">
+          Review the selected refund request.
+        </p>
+
+        <form
+          class="admin-form"
+          id="refundActionForm"
+        >
+          <input
+            type="hidden"
+            id="refundActionId"
+          >
+
+          <input
+            type="hidden"
+            id="refundActionType"
+          >
+
+          <label>
+            <span>Administrative note</span>
+
+            <textarea
+              id="refundAdminNote"
+              rows="5"
+              maxlength="500"
+              placeholder="Record the reason or processing details."
+            ></textarea>
+          </label>
+
+          <div class="reservation-card-actions">
+            <button
+              type="button"
+              class="button secondary"
+              id="cancelRefundAction"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="button primary"
+              id="confirmRefundAction"
+            >
+              Confirm action
+            </button>
+          </div>
+
+          <p
+            class="form-message"
+            id="refundActionMessage"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
+    </div>
+
+    <footer class="site-footer">
+      <span>
+        SyncSpace Administration
+      </span>
+
+      <span>
+        Administrative access is restricted through Supabase
+        authentication and role-based database policies.
+      </span>
+    </footer>
+
+    <!-- Load each application script once, in this exact order. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>
