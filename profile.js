@@ -1,208 +1,1278 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const user = await getUser();
+(() => {
+  "use strict";
 
-  if (!user) {
-    showAuthModal(() => {
-      window.location.reload();
-    });
+  console.log("SyncSpace profile script loaded");
 
-    return;
-  }
+  const GET_RESERVATIONS_RPC =
+    "get_my_reservations";
 
-  const displayName = getDisplayName(user);
+  const REQUEST_CANCELLATION_RPC =
+    "request_booking_cancellation";
 
-  document.querySelector(
-    "#profileDisplayName"
-  ).textContent = displayName;
+  const profileContent =
+    document.querySelector("#profileContent");
 
-  document.querySelector(
-    "#profileDisplayEmail"
-  ).textContent = user.email ?? "";
+  const profilePageMessage =
+    document.querySelector("#profilePageMessage");
 
-  document.querySelector(
-    "#avatarInitials"
-  ).textContent = createInitials(displayName);
+  const profileDisplayName =
+    document.querySelector("#profileDisplayName");
 
-  await renderReservations();
-});
+  const profileDisplayEmail =
+    document.querySelector("#profileDisplayEmail");
 
-function createInitials(name) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0))
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
+  const avatarInitials =
+    document.querySelector("#avatarInitials");
 
-function todayIso() {
-  const now = new Date();
+  const profileRoleBadge =
+    document.querySelector("#profileRoleBadge");
 
-  const localDate = new Date(
-    now.getTime() - now.getTimezoneOffset() * 60000
-  );
+  const pendingPaymentCount =
+    document.querySelector("#pendingPaymentCount");
 
-  return localDate.toISOString().slice(0, 10);
-}
+  const upcomingCount =
+    document.querySelector("#upcomingCount");
 
-async function renderReservations() {
+  const refundCount =
+    document.querySelector("#refundCount");
+
+  const pastCount =
+    document.querySelector("#pastCount");
+
+  const pendingPaymentList =
+    document.querySelector("#pendingPaymentList");
+
   const upcomingList =
     document.querySelector("#upcomingList");
+
+  const cancellationRefundList =
+    document.querySelector("#cancellationRefundList");
 
   const pastList =
     document.querySelector("#pastList");
 
-  upcomingList.innerHTML =
-    '<div class="empty-state">Loading reservations...</div>';
+  let currentUser = null;
+  let currentProfile = null;
+  let reservations = [];
 
-  pastList.innerHTML =
-    '<div class="empty-state">Loading reservations...</div>';
+  function assertRequiredElements() {
+    const requiredElements = {
+      profileContent,
+      profilePageMessage,
+      profileDisplayName,
+      profileDisplayEmail,
+      avatarInitials,
+      profileRoleBadge,
+      pendingPaymentCount,
+      upcomingCount,
+      refundCount,
+      pastCount,
+      pendingPaymentList,
+      upcomingList,
+      cancellationRefundList,
+      pastList
+    };
 
-  try {
-    const bookings = await getUserBookings();
-    const today = todayIso();
+    const missing = Object
+      .entries(requiredElements)
+      .filter(([, element]) => !element)
+      .map(([name]) => name);
 
-    const upcoming = bookings
-      .filter((booking) => {
-        return (
-          booking.end_date >= today &&
-          booking.status !== "cancelled"
-        );
-      })
-      .sort((a, b) =>
-        a.start_date.localeCompare(b.start_date)
+    if (missing.length > 0) {
+      throw new Error(
+        "Profile page elements were not found: " +
+        missing.join(", ")
       );
+    }
+  }
 
-    const past = bookings
-      .filter((booking) => {
-        return (
-          booking.end_date < today ||
-          booking.status === "cancelled"
-        );
-      })
-      .sort((a, b) =>
-        b.start_date.localeCompare(a.start_date)
-      );
+  function createInitials(name) {
+    const initials = String(name || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
 
-    upcomingList.innerHTML = upcoming.length
-      ? upcoming.map(reservationCard).join("")
-      : `
-        <div class="empty-state">
-          No upcoming reservations.
-          <a href="booking.html">Book a room</a>
-          to get started.
-        </div>
-      `;
+    return initials || "SS";
+  }
 
-    pastList.innerHTML = past.length
-      ? past.map(reservationCard).join("")
-      : `
-        <div class="empty-state">
-          No past reservations yet.
-        </div>
-      `;
-  } catch (error) {
-    console.error("Unable to load bookings:", error);
+  function escapeHtml(value) {
+    const div = document.createElement("div");
+
+    div.textContent =
+      String(value ?? "");
+
+    return div.innerHTML;
+  }
+
+  function formatPrice(value) {
+    return new Intl.NumberFormat(
+      "en-MY",
+      {
+        style: "currency",
+        currency: "MYR",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    ).format(Number(value || 0));
+  }
+
+  function formatDate(isoDate) {
+    if (!isoDate) {
+      return "-";
+    }
+
+    const date = new Date(
+      `${isoDate}T00:00:00`
+    );
+
+    return new Intl.DateTimeFormat(
+      "en-MY",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      }
+    ).format(date);
+  }
+
+  function formatDateRange(
+    startDate,
+    endDate
+  ) {
+    if (!startDate || !endDate) {
+      return "-";
+    }
+
+    if (startDate === endDate) {
+      return formatDate(startDate);
+    }
+
+    return (
+      `${formatDate(startDate)} to ` +
+      `${formatDate(endDate)}`
+    );
+  }
+
+  function formatDateTime(value) {
+    if (!value) {
+      return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+
+    return new Intl.DateTimeFormat(
+      "en-MY",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }
+    ).format(date);
+  }
+
+  function createReference(id) {
+    if (!id) {
+      return "-";
+    }
+
+    return String(id)
+      .split("-")[0]
+      .toUpperCase();
+  }
+
+  function bookingStatusLabel(status) {
+    const labels = {
+      pending_payment:
+        "Pending payment",
+
+      confirmed:
+        "Confirmed",
+
+      completed:
+        "Completed",
+
+      cancel_requested:
+        "Cancellation requested",
+
+      cancelled:
+        "Cancelled",
+
+      expired:
+        "Expired"
+    };
+
+    return labels[status] || "Unknown";
+  }
+
+  function paymentStatusLabel(status) {
+    const labels = {
+      pending:
+        "Pending",
+
+      paid:
+        "Paid",
+
+      failed:
+        "Failed",
+
+      refund_pending:
+        "Refund pending",
+
+      refunded:
+        "Refunded"
+    };
+
+    return labels[status] || "Not available";
+  }
+
+  function refundStatusLabel(status) {
+    const labels = {
+      requested:
+        "Requested",
+
+      approved:
+        "Approved",
+
+      rejected:
+        "Rejected",
+
+      processing:
+        "Processing",
+
+      refunded:
+        "Refunded"
+    };
+
+    return labels[status] || "Not requested";
+  }
+
+  function statusClass(status) {
+    return String(status || "unknown")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-");
+  }
+
+  function setPageMessage(
+    message,
+    status = ""
+  ) {
+    profilePageMessage.textContent =
+      message;
+
+    profilePageMessage.dataset.status =
+      status;
+  }
+
+  function setLoadingState() {
+    profileContent.setAttribute(
+      "aria-busy",
+      "true"
+    );
+
+    pendingPaymentList.innerHTML = `
+      <div class="empty-state">
+        Loading pending payments...
+      </div>
+    `;
 
     upcomingList.innerHTML = `
       <div class="empty-state">
-        Reservations could not be loaded.
+        Loading upcoming reservations...
+      </div>
+    `;
+
+    cancellationRefundList.innerHTML = `
+      <div class="empty-state">
+        Loading cancellation and refund requests...
       </div>
     `;
 
     pastList.innerHTML = `
       <div class="empty-state">
-        Reservations could not be loaded.
+        Loading reservation history...
       </div>
     `;
   }
-}
 
-function reservationCard(booking) {
-  const dateText =
-    booking.start_date === booking.end_date
-      ? formatDate(booking.start_date)
-      : `${formatDate(booking.start_date)} to ` +
-        `${formatDate(booking.end_date)}`;
+  function setLoadedState() {
+    profileContent.setAttribute(
+      "aria-busy",
+      "false"
+    );
+  }
 
-  const status =
-    booking.status || "confirmed";
+  function renderProfileIdentity() {
+    const displayName =
+      getDisplayName(
+        currentUser,
+        currentProfile
+      );
 
-  return `
-    <article class="reservation-card">
-      <div class="reservation-card-top">
-        <div>
-          <span class="pill">
-            ${escapeHtml(booking.room_type)}
-          </span>
+    profileDisplayName.textContent =
+      displayName;
 
-          <h3>
-            ${escapeHtml(booking.room_name)}
-          </h3>
-        </div>
+    profileDisplayEmail.textContent =
+      currentUser.email || "";
 
-        <span class="pill">
-          ${escapeHtml(capitalize(status))}
-        </span>
-      </div>
+    avatarInitials.textContent =
+      createInitials(displayName);
 
+    const role =
+      currentProfile?.role === "admin"
+        ? "Administrator"
+        : "Customer";
+
+    profileRoleBadge.textContent =
+      role;
+
+    profileRoleBadge.className =
+      currentProfile?.role === "admin"
+        ? "pill profile-role-badge status-admin"
+        : "pill profile-role-badge";
+  }
+
+  async function getReservations() {
+    const { data, error } =
+      await getSupabaseClient().rpc(
+        GET_RESERVATIONS_RPC
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    return data ?? [];
+  }
+
+  function classifyReservations() {
+    const now = Date.now();
+
+    const pendingPayments =
+      reservations
+        .filter((reservation) => {
+          return (
+            reservation.booking_status ===
+              "pending_payment" &&
+            reservation.payment_status ===
+              "pending"
+          );
+        })
+        .sort((a, b) =>
+          new Date(a.starts_at) -
+          new Date(b.starts_at)
+        );
+
+    const upcoming =
+      reservations
+        .filter((reservation) => {
+          return (
+            reservation.booking_status ===
+              "confirmed" &&
+            new Date(
+              reservation.ends_at
+            ).getTime() >= now
+          );
+        })
+        .sort((a, b) =>
+          new Date(a.starts_at) -
+          new Date(b.starts_at)
+        );
+
+    const cancellationAndRefund =
+      reservations
+        .filter((reservation) => {
+          return (
+            reservation.booking_status ===
+              "cancel_requested" ||
+            reservation.booking_status ===
+              "cancelled" ||
+            Boolean(
+              reservation.refund_status
+            )
+          );
+        })
+        .sort((a, b) =>
+          new Date(b.starts_at) -
+          new Date(a.starts_at)
+        );
+
+    const past =
+      reservations
+        .filter((reservation) => {
+          return (
+            reservation.booking_status ===
+              "completed" ||
+            reservation.booking_status ===
+              "cancelled" ||
+            reservation.booking_status ===
+              "expired"
+          );
+        })
+        .sort((a, b) =>
+          new Date(b.starts_at) -
+          new Date(a.starts_at)
+        );
+
+    return {
+      pendingPayments,
+      upcoming,
+      cancellationAndRefund,
+      past
+    };
+  }
+
+  function renderReservationStats(
+    groups
+  ) {
+    pendingPaymentCount.textContent =
+      String(
+        groups.pendingPayments.length
+      );
+
+    upcomingCount.textContent =
+      String(
+        groups.upcoming.length
+      );
+
+    refundCount.textContent =
+      String(
+        groups.cancellationAndRefund.length
+      );
+
+    pastCount.textContent =
+      String(
+        groups.past.length
+      );
+  }
+
+  function createReservationDetails(
+    reservation,
+    options = {}
+  ) {
+    const {
+      includePayment = true,
+      includeRefund = false
+    } = options;
+
+    return `
       <dl class="reservation-details">
         <div>
           <dt>Date</dt>
-          <dd>${escapeHtml(dateText)}</dd>
+
+          <dd>
+            ${escapeHtml(
+              formatDateRange(
+                reservation.start_date,
+                reservation.end_date
+              )
+            )}
+          </dd>
         </div>
 
         <div>
           <dt>Time</dt>
-          <dd>${escapeHtml(booking.time_slot)}</dd>
+
+          <dd>
+            ${escapeHtml(
+              reservation.time_slot
+            )}
+          </dd>
+        </div>
+
+        <div>
+          <dt>Pax</dt>
+
+          <dd>
+            ${escapeHtml(
+              reservation.party_size
+            )}
+          </dd>
         </div>
 
         <div>
           <dt>Total</dt>
-          <dd>${escapeHtml(formatPrice(booking.total))}</dd>
-        </div>
 
-        <div>
-          <dt>Reference</dt>
           <dd>
             ${escapeHtml(
-              booking.id.split("-")[0].toUpperCase()
+              formatPrice(
+                reservation.total
+              )
             )}
           </dd>
         </div>
+
+        <div>
+          <dt>Booking reference</dt>
+
+          <dd>
+            ${escapeHtml(
+              createReference(
+                reservation.id
+              )
+            )}
+          </dd>
+        </div>
+
+        ${
+          includePayment
+            ? `
+              <div>
+                <dt>Payment</dt>
+
+                <dd>
+                  ${escapeHtml(
+                    paymentStatusLabel(
+                      reservation.payment_status
+                    )
+                  )}
+                </dd>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          includeRefund
+            ? `
+              <div>
+                <dt>Refund</dt>
+
+                <dd>
+                  ${escapeHtml(
+                    refundStatusLabel(
+                      reservation.refund_status
+                    )
+                  )}
+                </dd>
+              </div>
+            `
+            : ""
+        }
       </dl>
-    </article>
-  `;
-}
+    `;
+  }
 
-function formatDate(isoDate) {
-  const date = new Date(`${isoDate}T00:00:00`);
+  function createReservationHeading(
+    reservation
+  ) {
+    return `
+      <div>
+        <span class="pill">
+          ${escapeHtml(
+            reservation.workspace_type
+          )}
+        </span>
 
-  return new Intl.DateTimeFormat("en-MY", {
-    day: "numeric",
-    month: "short",
-    year: "numeric"
-  }).format(date);
-}
+        <h3>
+          ${escapeHtml(
+            reservation.workspace_name
+          )}
+        </h3>
 
-function formatPrice(value) {
-  return new Intl.NumberFormat("en-MY", {
-    style: "currency",
-    currency: "MYR",
-    maximumFractionDigits: 0
-  }).format(Number(value));
-}
+        <p class="reservation-unit-code">
+          Unit
+          ${escapeHtml(
+            reservation.unit_code
+          )}
+        </p>
+      </div>
+    `;
+  }
 
-function capitalize(value) {
-  const text = String(value ?? "");
+  function pendingPaymentCard(
+    reservation
+  ) {
+    const paymentUrl =
+      `payment.html?booking=` +
+      encodeURIComponent(
+        reservation.id
+      );
 
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
+    return `
+      <article
+        class="reservation-card"
+        data-booking-id="${escapeHtml(
+          reservation.id
+        )}"
+      >
+        <div class="reservation-card-top">
+          ${createReservationHeading(
+            reservation
+          )}
 
-function escapeHtml(value) {
-  const div = document.createElement("div");
-  div.textContent = String(value ?? "");
-  return div.innerHTML;
-}
+          <span
+            class="pill status-pending-payment"
+          >
+            Pending payment
+          </span>
+        </div>
+
+        ${createReservationDetails(
+          reservation
+        )}
+
+        <div class="reservation-card-actions">
+          <a
+            class="button primary"
+            href="${escapeHtml(paymentUrl)}"
+          >
+            Continue payment
+          </a>
+        </div>
+      </article>
+    `;
+  }
+
+  function upcomingReservationCard(
+    reservation
+  ) {
+    return `
+      <article
+        class="reservation-card"
+        data-booking-id="${escapeHtml(
+          reservation.id
+        )}"
+      >
+        <div class="reservation-card-top">
+          ${createReservationHeading(
+            reservation
+          )}
+
+          <span
+            class="pill status-confirmed"
+          >
+            Confirmed
+          </span>
+        </div>
+
+        ${createReservationDetails(
+          reservation
+        )}
+
+        <div class="reservation-card-actions">
+          <button
+            type="button"
+            class="button secondary cancel-booking-button"
+            data-cancel-booking-id="${escapeHtml(
+              reservation.id
+            )}"
+          >
+            Request cancellation
+          </button>
+        </div>
+      </article>
+    `;
+  }
+
+  function cancellationRefundCard(
+    reservation
+  ) {
+    const bookingStatus =
+      bookingStatusLabel(
+        reservation.booking_status
+      );
+
+    const refundStatus =
+      refundStatusLabel(
+        reservation.refund_status
+      );
+
+    return `
+      <article
+        class="reservation-card"
+        data-booking-id="${escapeHtml(
+          reservation.id
+        )}"
+      >
+        <div class="reservation-card-top">
+          ${createReservationHeading(
+            reservation
+          )}
+
+          <span
+            class="pill status-${escapeHtml(
+              statusClass(
+                reservation.refund_status ||
+                reservation.booking_status
+              )
+            )}"
+          >
+            ${escapeHtml(
+              reservation.refund_status
+                ? refundStatus
+                : bookingStatus
+            )}
+          </span>
+        </div>
+
+        ${createReservationDetails(
+          reservation,
+          {
+            includePayment: true,
+            includeRefund: true
+          }
+        )}
+
+        <div class="reservation-status-note">
+          <strong>Current status:</strong>
+
+          ${escapeHtml(bookingStatus)}
+
+          ${
+            reservation.refund_status
+              ? ` — Refund ${escapeHtml(
+                  refundStatus.toLowerCase()
+                )}`
+              : ""
+          }
+        </div>
+      </article>
+    `;
+  }
+
+  function pastReservationCard(
+    reservation
+  ) {
+    const displayedStatus =
+      bookingStatusLabel(
+        reservation.booking_status
+      );
+
+    return `
+      <article
+        class="reservation-card"
+        data-booking-id="${escapeHtml(
+          reservation.id
+        )}"
+      >
+        <div class="reservation-card-top">
+          ${createReservationHeading(
+            reservation
+          )}
+
+          <span
+            class="pill status-${escapeHtml(
+              statusClass(
+                reservation.booking_status
+              )
+            )}"
+          >
+            ${escapeHtml(
+              displayedStatus
+            )}
+          </span>
+        </div>
+
+        ${createReservationDetails(
+          reservation,
+          {
+            includePayment: true,
+            includeRefund:
+              Boolean(
+                reservation.refund_status
+              )
+          }
+        )}
+
+        <p class="reservation-completed-at">
+          Reservation ended:
+          ${escapeHtml(
+            formatDateTime(
+              reservation.ends_at
+            )
+          )}
+        </p>
+      </article>
+    `;
+  }
+
+  function renderPendingPayments(
+    pendingPayments
+  ) {
+    pendingPaymentList.innerHTML =
+      pendingPayments.length
+        ? pendingPayments
+            .map(pendingPaymentCard)
+            .join("")
+        : `
+          <div class="empty-state">
+            You have no pending payments.
+          </div>
+        `;
+  }
+
+  function renderUpcomingReservations(
+    upcoming
+  ) {
+    upcomingList.innerHTML =
+      upcoming.length
+        ? upcoming
+            .map(
+              upcomingReservationCard
+            )
+            .join("")
+        : `
+          <div class="empty-state">
+            No upcoming reservations.
+            <a href="booking.html">
+              Book a workspace
+            </a>
+            to get started.
+          </div>
+        `;
+  }
+
+  function renderCancellationRefunds(
+    cancellationAndRefund
+  ) {
+    cancellationRefundList.innerHTML =
+      cancellationAndRefund.length
+        ? cancellationAndRefund
+            .map(
+              cancellationRefundCard
+            )
+            .join("")
+        : `
+          <div class="empty-state">
+            No cancellation or refund requests.
+          </div>
+        `;
+  }
+
+  function renderPastReservations(
+    past
+  ) {
+    pastList.innerHTML =
+      past.length
+        ? past
+            .map(pastReservationCard)
+            .join("")
+        : `
+          <div class="empty-state">
+            No past reservations yet.
+          </div>
+        `;
+  }
+
+  function renderReservations() {
+    const groups =
+      classifyReservations();
+
+    renderReservationStats(groups);
+
+    renderPendingPayments(
+      groups.pendingPayments
+    );
+
+    renderUpcomingReservations(
+      groups.upcoming
+    );
+
+    renderCancellationRefunds(
+      groups.cancellationAndRefund
+    );
+
+    renderPastReservations(
+      groups.past
+    );
+  }
+
+  async function loadReservations() {
+    setLoadingState();
+    setPageMessage("");
+
+    try {
+      reservations =
+        await getReservations();
+
+      renderReservations();
+    } catch (error) {
+      console.error(
+        "Unable to load reservations:",
+        error
+      );
+
+      setPageMessage(
+        error.message ||
+        "Reservations could not be loaded.",
+        "error"
+      );
+
+      pendingPaymentList.innerHTML = `
+        <div class="empty-state">
+          Pending payments could not be loaded.
+        </div>
+      `;
+
+      upcomingList.innerHTML = `
+        <div class="empty-state">
+          Upcoming reservations could not be loaded.
+        </div>
+      `;
+
+      cancellationRefundList.innerHTML = `
+        <div class="empty-state">
+          Cancellation and refund information
+          could not be loaded.
+        </div>
+      `;
+
+      pastList.innerHTML = `
+        <div class="empty-state">
+          Reservation history could not be loaded.
+        </div>
+      `;
+    } finally {
+      setLoadedState();
+    }
+  }
+
+  function showCancellationDialog(
+    reservation
+  ) {
+    return new Promise((resolve) => {
+      if (
+        document.querySelector(
+          ".cancellation-overlay"
+        )
+      ) {
+        resolve(null);
+        return;
+      }
+
+      const overlay =
+        document.createElement("div");
+
+      overlay.className =
+        "auth-overlay cancellation-overlay";
+
+      overlay.innerHTML = `
+        <div
+          class="auth-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancellationTitle"
+        >
+          <button
+            type="button"
+            class="auth-close"
+            aria-label="Close cancellation request"
+          >
+            &times;
+          </button>
+
+          <p class="eyebrow">
+            Cancellation request
+          </p>
+
+          <h2 id="cancellationTitle">
+            Cancel
+            ${escapeHtml(
+              reservation.workspace_name
+            )}?
+          </h2>
+
+          <p>
+            The reservation will remain active until
+            SyncSpace reviews the cancellation and refund request.
+          </p>
+
+          <form
+            class="auth-form"
+            id="cancellationForm"
+          >
+            <label>
+              <span>Reason for cancellation</span>
+
+              <textarea
+                id="cancellationReason"
+                rows="5"
+                maxlength="500"
+                placeholder="Explain why you need to cancel this reservation."
+                required
+              ></textarea>
+            </label>
+
+            <div class="reservation-card-actions">
+              <button
+                type="button"
+                class="button secondary"
+                id="keepReservationButton"
+              >
+                Keep reservation
+              </button>
+
+              <button
+                type="submit"
+                class="button primary"
+              >
+                Submit request
+              </button>
+            </div>
+
+            <p
+              class="auth-message"
+              id="cancellationMessage"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </form>
+        </div>
+      `;
+
+      document.body.appendChild(
+        overlay
+      );
+
+      const form =
+        overlay.querySelector(
+          "#cancellationForm"
+        );
+
+      const reasonInput =
+        overlay.querySelector(
+          "#cancellationReason"
+        );
+
+      const closeButton =
+        overlay.querySelector(
+          ".auth-close"
+        );
+
+      const keepButton =
+        overlay.querySelector(
+          "#keepReservationButton"
+        );
+
+      const previousOverflow =
+        document.body.style.overflow;
+
+      document.body.style.overflow =
+        "hidden";
+
+      function closeDialog(result) {
+        document.removeEventListener(
+          "keydown",
+          handleEscape
+        );
+
+        document.body.style.overflow =
+          previousOverflow;
+
+        overlay.remove();
+        resolve(result);
+      }
+
+      function handleEscape(event) {
+        if (event.key === "Escape") {
+          closeDialog(null);
+        }
+      }
+
+      document.addEventListener(
+        "keydown",
+        handleEscape
+      );
+
+      closeButton.addEventListener(
+        "click",
+        () => closeDialog(null)
+      );
+
+      keepButton.addEventListener(
+        "click",
+        () => closeDialog(null)
+      );
+
+      overlay.addEventListener(
+        "click",
+        (event) => {
+          if (event.target === overlay) {
+            closeDialog(null);
+          }
+        }
+      );
+
+      form.addEventListener(
+        "submit",
+        (event) => {
+          event.preventDefault();
+
+          const reason =
+            reasonInput.value.trim();
+
+          if (!reason) {
+            reasonInput.focus();
+            return;
+          }
+
+          closeDialog(reason);
+        }
+      );
+
+      window.setTimeout(() => {
+        reasonInput.focus();
+      }, 0);
+    });
+  }
+
+  async function requestCancellation(
+    bookingId,
+    button
+  ) {
+    const reservation =
+      reservations.find(
+        (item) =>
+          item.id === bookingId
+      );
+
+    if (!reservation) {
+      setPageMessage(
+        "The selected reservation could not be found.",
+        "error"
+      );
+
+      return;
+    }
+
+    const reason =
+      await showCancellationDialog(
+        reservation
+      );
+
+    if (!reason) {
+      return;
+    }
+
+    button.disabled = true;
+
+    setPageMessage(
+      "Submitting your cancellation and refund request...",
+      "loading"
+    );
+
+    try {
+      const { error } =
+        await getSupabaseClient().rpc(
+          REQUEST_CANCELLATION_RPC,
+          {
+            p_booking_id:
+              bookingId,
+
+            p_reason:
+              reason
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      setPageMessage(
+        "Your cancellation and refund request was submitted successfully.",
+        "success"
+      );
+
+      await loadReservations();
+    } catch (error) {
+      console.error(
+        "Cancellation request failed:",
+        error
+      );
+
+      setPageMessage(
+        error.message ||
+        "The cancellation request could not be submitted.",
+        "error"
+      );
+
+      button.disabled = false;
+    }
+  }
+
+  function handleUpcomingListClick(
+    event
+  ) {
+    const button =
+      event.target.closest(
+        "[data-cancel-booking-id]"
+      );
+
+    if (!button) {
+      return;
+    }
+
+    void requestCancellation(
+      button.dataset.cancelBookingId,
+      button
+    );
+  }
+
+  async function initializeProfilePage() {
+    assertRequiredElements();
+
+    currentUser =
+      await requireAuthenticatedUser(
+        "index.html"
+      );
+
+    if (!currentUser) {
+      return;
+    }
+
+    currentProfile =
+      await getUserProfile(
+        currentUser
+      );
+
+    renderProfileIdentity();
+
+    upcomingList.addEventListener(
+      "click",
+      handleUpcomingListClick
+    );
+
+    await loadReservations();
+  }
+
+  async function start() {
+    try {
+      await initializeProfilePage();
+    } catch (error) {
+      console.error(
+        "Profile page initialization failed:",
+        error
+      );
+
+      setPageMessage(
+        error.message ||
+        "The profile page could not be loaded.",
+        "error"
+      );
+
+      setLoadedState();
+    }
+  }
+
+  if (
+    document.readyState === "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      start,
+      { once: true }
+    );
+  } else {
+    void start();
+  }
+})();
