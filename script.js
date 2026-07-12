@@ -187,31 +187,123 @@ function updateSummary() {
   summaryTotal.textContent = selectedRoom ? `${formatPrice(selectedRoom.price * getBookingDays())} (${getBookingDays()} day${getBookingDays() === 1 ? "" : "s"})` : "-";
 }
 
-startDate.min = todayIso();
-endDate.min = todayIso();
-startDate.value = todayIso();
-endDate.value = addDays(todayIso(), 1);
-renderRooms();
-prefillFromUser();
+async function initializeBookingPage() {
+  const requiredElements = {
+    roomStrip,
+    roomCount,
+    startDate,
+    endDate,
+    timeSlot,
+    roomType,
+    peopleCount,
+    availableOnly,
+    selectedRoomName,
+    summaryDate,
+    summaryTime,
+    summaryTotal,
+    bookingForm,
+    formMessage
+  };
 
-document.querySelector("#filters").addEventListener("input", (event) => {
-  if (event.target === timeSlot && selectedRoom) {
-    updateSummary();
-    formMessage.textContent = "";
-    return;
+  const missingElements = Object.entries(requiredElements)
+    .filter(([, element]) => !element)
+    .map(([name]) => name);
+
+  if (missingElements.length > 0) {
+    throw new Error(
+      `Booking page elements were not found: ${missingElements.join(", ")}`
+    );
   }
 
-  if (endDate.value < startDate.value) {
+  const today = todayIso();
+
+  startDate.min = today;
+  endDate.min = today;
+
+  if (!startDate.value) {
+    startDate.value = today;
+  }
+
+  if (!endDate.value || endDate.value < startDate.value) {
     endDate.value = startDate.value;
   }
+
   endDate.min = startDate.value;
-  selectedRoom = null;
-  selectedRoomName.textContent = "Choose a room to continue";
-  updateSummary();
-  formMessage.textContent = "";
+
   renderRooms();
-  prefillFromUser();
+  await prefillFromUser();
+}
+
+initializeBookingPage().catch((error) => {
+  console.error("Booking page initialization failed:", error);
+
+  if (roomCount) {
+    roomCount.textContent =
+      "The booking interface could not be loaded.";
+  }
 });
+
+if (window.supabaseClient) {
+  window.supabaseClient.auth.onAuthStateChange(
+    async (_event, session) => {
+      const nameInput =
+        document.querySelector("#customerName");
+
+      const emailInput =
+        document.querySelector("#customerEmail");
+
+      if (!nameInput || !emailInput) {
+        return;
+      }
+
+      const user = session?.user ?? null;
+
+      if (user) {
+        nameInput.value = getDisplayName(user);
+        emailInput.value = user.email ?? "";
+      } else {
+        nameInput.value = "";
+        emailInput.value = "";
+      }
+    }
+  );
+}
+
+document
+  .querySelector("#filters")
+  .addEventListener("input", (event) => {
+    if (event.target === startDate) {
+      endDate.min = startDate.value;
+
+      if (
+        !endDate.value ||
+        endDate.value < startDate.value
+      ) {
+        endDate.value = startDate.value;
+      }
+    }
+
+    if (event.target === endDate) {
+      if (endDate.value < startDate.value) {
+        endDate.value = startDate.value;
+      }
+    }
+
+    if (event.target === timeSlot && selectedRoom) {
+      updateSummary();
+      formMessage.textContent = "";
+      return;
+    }
+
+    selectedRoom = null;
+
+    selectedRoomName.textContent =
+      "Choose a room to continue";
+
+    updateSummary();
+    formMessage.textContent = "";
+    renderRooms();
+  });
 
 roomStrip.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-room-id]");
@@ -234,6 +326,13 @@ async function prefillFromUser() {
 
   const emailInput =
     document.querySelector("#customerEmail");
+
+  if (!nameInput || !emailInput) {
+    console.error(
+      "Customer name or email field was not found."
+    );
+    return;
+  }
 
   if (!user) {
     nameInput.value = "";
