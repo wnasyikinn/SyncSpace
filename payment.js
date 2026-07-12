@@ -282,8 +282,6 @@
       pending_payment: "Pending payment",
       confirmed: "Confirmed",
       completed: "Completed",
-      cancel_requested:
-        "Cancellation requested",
       cancelled: "Cancelled",
       expired: "Expired"
     };
@@ -559,11 +557,11 @@
           ? "person"
           : "people"
       }`;
-
+    
     paymentUnitPrice.textContent =
       `${formatPrice(
         currentBooking.unit_price
-      )} per day`;
+      )} per booked day for the selected time`;
 
     paymentTotal.textContent =
       formatPrice(
@@ -704,18 +702,6 @@
         "Payment was not completed within the allowed " +
         "time. The workspace has been released for " +
         "other customers."
-      );
-
-      return;
-    }
-
-    if (
-      bookingStatus === "cancel_requested"
-    ) {
-      showPaymentUnavailable(
-        "Cancellation requested",
-        "A cancellation and refund request has already " +
-        "been submitted for this reservation."
       );
 
       return;
