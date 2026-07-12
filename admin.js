@@ -379,9 +379,6 @@
     return labels[status] || "Unknown";
   }
 
-    return labels[status] || "Unknown";
-  }
-
   function paymentStatusLabel(status) {
     const labels = {
       pending: "Pending",
@@ -393,25 +390,13 @@
     return labels[status] || "Unknown";
   }
 
-    return labels[status] || "Unknown";
-  }
-
   function refundStatusLabel(status) {
     const labels = {
-      requested:
-        "Requested",
-
-      approved:
-        "Approved",
-
-      rejected:
-        "Rejected",
-
-      processing:
-        "Processing",
-
-      refunded:
-        "Refunded"
+      requested: "Requested",
+      approved: "Approved",
+      rejected: "Rejected",
+      processing: "Processing",
+      refunded: "Refunded"
     };
 
     return labels[status] || "Unknown";
@@ -2282,7 +2267,7 @@
           "Approve refund request",
 
         description:
-          "Approve this request while keeping the booking in cancellation-requested status.",
+          "Approve this request. The booking remains confirmed and the payment remains paid until the refund is completed.",
 
         button:
           "Approve request"
@@ -2315,7 +2300,7 @@
           "Reject refund request",
 
         description:
-          "This restores the booking to confirmed and the payment to paid.",
+          "Reject this request. The booking remains confirmed, the payment remains paid, and the cancellation request is closed.",
 
         button:
           "Reject request"
