@@ -2,16 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>My Profile | SyncSpace</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    >
+
+    <title>My Reservations | SyncSpace</title>
 
     <meta
       name="description"
-      content="View your SyncSpace profile and booking history."
+      content="View your SyncSpace account, pending payments, upcoming reservations, cancellation and refund requests, and reservation history."
     >
 
-    <link rel="stylesheet" href="styles.css">
+    <link
+      rel="stylesheet"
+      href="styles.css"
+    >
   </head>
 
   <body>
@@ -31,9 +38,21 @@
         class="main-nav"
         aria-label="Primary navigation"
       >
-        <a href="index.html#about">About</a>
-        <a href="index.html#spaces">Spaces</a>
-        <a href="index.html#benefits">Benefits</a>
+        <a href="index.html#about">
+          About
+        </a>
+
+        <a href="index.html#spaces">
+          Spaces
+        </a>
+
+        <a href="index.html#how-it-works">
+          How It Works
+        </a>
+
+        <a href="index.html#benefits">
+          Benefits
+        </a>
 
         <a
           class="nav-cta"
@@ -50,6 +69,15 @@
           aria-current="page"
         >
           Profile
+        </a>
+
+        <a
+          href="admin.html"
+          id="navAdmin"
+          class="nav-profile"
+          style="display: none"
+        >
+          Admin
         </a>
 
         <button
@@ -74,41 +102,224 @@
     <main>
       <section class="profile-header">
         <div>
-          <p class="eyebrow">Account</p>
-          <h1>My Profile</h1>
+          <p class="eyebrow">
+            Account and reservations
+          </p>
+
+          <h1>
+            My Profile
+          </h1>
+
+          <p>
+            Review pending payments, manage upcoming reservations,
+            monitor cancellation and refund requests, and view your
+            completed reservation history.
+          </p>
         </div>
       </section>
 
-      <section class="profile-content">
-        <div class="profile-card">
+      <section
+        class="profile-content"
+        id="profileContent"
+        aria-busy="true"
+      >
+        <p
+          class="form-message profile-page-message"
+          id="profilePageMessage"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+        <section
+          class="profile-card"
+          aria-labelledby="profileDisplayName"
+        >
           <div
             class="profile-avatar"
             id="profileAvatar"
             aria-hidden="true"
           >
-            <span id="avatarInitials">SS</span>
+            <span id="avatarInitials">
+              SS
+            </span>
           </div>
 
           <div class="profile-info">
-            <h2 id="profileDisplayName">
-              Loading profile...
-            </h2>
+            <div class="profile-name-row">
+              <div>
+                <p class="eyebrow">
+                  Customer profile
+                </p>
 
-            <p
-              id="profileDisplayEmail"
-              class="profile-email"
-            ></p>
+                <h2 id="profileDisplayName">
+                  Loading profile...
+                </h2>
+
+                <p
+                  id="profileDisplayEmail"
+                  class="profile-email"
+                ></p>
+              </div>
+
+              <span
+                class="pill profile-role-badge"
+                id="profileRoleBadge"
+              >
+                Customer
+              </span>
+            </div>
+
+            <p class="profile-account-note">
+              Your account and reservation records are securely
+              associated with your authenticated SyncSpace account.
+            </p>
           </div>
-        </div>
+        </section>
 
-        <div class="bookings-card">
+        <section
+          class="reservation-overview"
+          aria-labelledby="reservationOverviewTitle"
+        >
           <div class="bookings-header">
             <div>
-              <p class="eyebrow">Upcoming</p>
+              <p class="eyebrow">
+                Reservation overview
+              </p>
 
-              <h2>
+              <h2 id="reservationOverviewTitle">
+                Your booking activity
+              </h2>
+            </div>
+
+            <a
+              class="button primary"
+              href="booking.html"
+            >
+              Make a new booking
+            </a>
+          </div>
+
+          <div class="reservation-stats">
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="pendingPaymentCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Pending payment
+              </strong>
+
+              <p>
+                Temporary workspace holds that still require payment.
+              </p>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="upcomingCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Upcoming
+              </strong>
+
+              <p>
+                Paid and confirmed future workspace reservations.
+              </p>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="refundCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Refund requests
+              </strong>
+
+              <p>
+                Cancellation and refund requests awaiting resolution.
+              </p>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="pastCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Past reservations
+              </strong>
+
+              <p>
+                Completed, cancelled, or expired reservation records.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card"
+          aria-labelledby="pendingPaymentTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Action required
+              </p>
+
+              <h2 id="pendingPaymentTitle">
+                Pending Payments
+              </h2>
+
+              <p>
+                Complete payment before the temporary workspace hold
+                expires. Unpaid holds are released automatically.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="pendingPaymentList"
+            class="bookings-list"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading pending payments...
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card"
+          aria-labelledby="upcomingReservationsTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Confirmed
+              </p>
+
+              <h2 id="upcomingReservationsTitle">
                 Upcoming Reservations
               </h2>
+
+              <p>
+                These reservations have been paid and confirmed.
+                Eligible reservations may be submitted for cancellation.
+              </p>
             </div>
           </div>
 
@@ -118,19 +329,61 @@
             aria-live="polite"
           >
             <div class="empty-state">
-              Loading reservations...
+              Loading upcoming reservations...
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="bookings-card">
+        <section
+          class="bookings-card"
+          aria-labelledby="cancellationRefundTitle"
+        >
           <div class="bookings-header">
             <div>
-              <p class="eyebrow">History</p>
+              <p class="eyebrow">
+                Cancellation and refund
+              </p>
 
-              <h2>
+              <h2 id="cancellationRefundTitle">
+                Cancellation and Refund Status
+              </h2>
+
+              <p>
+                SyncSpace administrators review cancellation requests
+                and update the refund status after processing.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="cancellationRefundList"
+            class="bookings-list"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading cancellation and refund requests...
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card"
+          aria-labelledby="pastReservationsTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Reservation history
+              </p>
+
+              <h2 id="pastReservationsTitle">
                 Past Reservations
               </h2>
+
+              <p>
+                Completed, cancelled, and expired reservations are
+                retained here for reference.
+              </p>
             </div>
           </div>
 
@@ -140,22 +393,25 @@
             aria-live="polite"
           >
             <div class="empty-state">
-              Loading reservations...
+              Loading reservation history...
             </div>
           </div>
-        </div>
+        </section>
       </section>
     </main>
 
     <footer class="site-footer">
-      <span>SyncSpace</span>
+      <span>
+        SyncSpace
+      </span>
 
       <span>
-        Account and reservation data are managed through Supabase.
+        Account, payment, reservation, cancellation, and refund
+        information is managed through Supabase.
       </span>
     </footer>
 
-    <!-- Load each script once, in this exact order. -->
+    <!-- Load each application script once, in this exact order. -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
