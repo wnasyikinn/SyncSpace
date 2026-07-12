@@ -1,3 +1,5 @@
+console.log("SyncSpace authentication script loaded");
+
 function getSupabaseClient() {
   if (!window.supabaseClient) {
     throw new Error("Supabase client has not been initialized.");
