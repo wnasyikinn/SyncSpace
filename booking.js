@@ -543,7 +543,7 @@
               <span class="room-price">
                 ${escapeHtml(
                   formatPrice(workspace.price)
-                )} / day
+                )} / booked day for selected time
               </span>
             </div>
 
