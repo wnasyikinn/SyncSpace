@@ -189,6 +189,7 @@ endDate.min = todayIso();
 startDate.value = todayIso();
 endDate.value = addDays(todayIso(), 1);
 renderRooms();
+prefillFromUser();
 
 document.querySelector("#filters").addEventListener("input", (event) => {
   if (event.target === timeSlot && selectedRoom) {
@@ -206,6 +207,7 @@ document.querySelector("#filters").addEventListener("input", (event) => {
   updateSummary();
   formMessage.textContent = "";
   renderRooms();
+  prefillFromUser();
 });
 
 roomStrip.addEventListener("click", (event) => {
@@ -221,12 +223,23 @@ document.querySelector("#scrollRight").addEventListener("click", () => {
   roomStrip.scrollBy({ left: 380, behavior: "smooth" });
 });
 
-function prefillFromUser() {
-  const user = getUser();
-  if (user) {
-    document.querySelector("#customerName").value = user.name;
-    document.querySelector("#customerEmail").value = user.email;
+async function prefillFromUser() {
+  const user = await getUser();
+
+  const nameInput =
+    document.querySelector("#customerName");
+
+  const emailInput =
+    document.querySelector("#customerEmail");
+
+  if (!user) {
+    nameInput.value = "";
+    emailInput.value = "";
+    return;
   }
+
+  nameInput.value = getDisplayName(user);
+  emailInput.value = user.email ?? "";
 }
 
 bookingForm.addEventListener("submit", (event) => {
