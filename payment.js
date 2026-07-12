@@ -6,7 +6,7 @@
   const COMPLETE_PAYMENT_RPC =
     "complete_simulated_payment";
 
-  const SYNC_RESERVATIONS_RPC =
+  const REFRESH_RESERVATIONS_RPC =
     "get_my_reservations";
 
   const PENDING_BOOKING_KEY =
@@ -235,9 +235,10 @@
       return "-";
     }
 
-    const date = new Date(
-      `${isoDate}T00:00:00`
-    );
+    const date =
+      new Date(
+        `${isoDate}T00:00:00`
+      );
 
     return new Intl.DateTimeFormat(
       "en-MY",
@@ -279,11 +280,20 @@
 
   function bookingStatusLabel(status) {
     const labels = {
-      pending_payment: "Pending payment",
-      confirmed: "Confirmed",
-      completed: "Completed",
-      cancelled: "Cancelled",
-      expired: "Expired"
+      pending_payment:
+        "Pending payment",
+
+      confirmed:
+        "Confirmed",
+
+      completed:
+        "Completed",
+
+      cancelled:
+        "Cancelled",
+
+      expired:
+        "Expired"
     };
 
     return labels[status] || "Unknown";
@@ -293,8 +303,11 @@
     message,
     status = ""
   ) {
-    paymentMessage.textContent = message;
-    paymentMessage.dataset.status = status;
+    paymentMessage.textContent =
+      message;
+
+    paymentMessage.dataset.status =
+      status;
   }
 
   function clearCountdown() {
@@ -310,6 +323,7 @@
   function showContent() {
     paymentLoading.hidden = true;
     paymentContent.hidden = false;
+
     paymentPage.setAttribute(
       "aria-busy",
       "false"
@@ -412,6 +426,10 @@
           layout,
           capacity,
           price,
+          morning_price,
+          afternoon_price,
+          evening_price,
+          full_day_price,
           image_url,
           workspace_type_id,
           workspace_types (
@@ -462,15 +480,15 @@
     return data;
   }
 
-  async function synchronizeExpiredBookings() {
+  async function refreshReservationStatuses() {
     const { error } =
       await getSupabaseClient().rpc(
-        SYNC_RESERVATIONS_RPC
+        REFRESH_RESERVATIONS_RPC
       );
 
     if (error) {
       console.warn(
-        "Booking expiry could not be synchronized:",
+        "Booking status could not be refreshed:",
         error.message
       );
     }
@@ -481,14 +499,26 @@
       return;
     }
 
+    const bookingId =
+      currentBooking.id;
+
     currentBooking =
       await loadBooking(
-        currentBooking.id
+        bookingId
       );
+
+    if (!currentBooking) {
+      showPaymentUnavailable(
+        "Reservation not found",
+        "The reservation could no longer be loaded."
+      );
+
+      return;
+    }
 
     currentPayment =
       await loadPaymentRecord(
-        currentBooking.id
+        bookingId
       );
 
     renderPaymentState();
@@ -498,17 +528,11 @@
     const imageUrl =
       currentWorkspace?.image_url;
 
-    if (!imageUrl) {
-      paymentWorkspaceImage.style
-        .backgroundImage =
-        "url('assets/syncspace-logo.png')";
-
-      return;
-    }
-
     paymentWorkspaceImage.style
       .backgroundImage =
-      `url("${imageUrl}")`;
+      imageUrl
+        ? `url("${imageUrl}")`
+        : "url('assets/syncspace-logo-mark.png')";
   }
 
   function getWorkspaceTypeName() {
@@ -516,12 +540,16 @@
       currentWorkspace?.workspace_types;
 
     if (Array.isArray(typeData)) {
-      return typeData[0]?.name ||
-        "Workspace";
+      return (
+        typeData[0]?.name ||
+        "Workspace"
+      );
     }
 
-    return typeData?.name ||
-      "Workspace";
+    return (
+      typeData?.name ||
+      "Workspace"
+    );
   }
 
   function renderBookingSummary() {
@@ -557,7 +585,7 @@
           ? "person"
           : "people"
       }`;
-    
+
     paymentUnitPrice.textContent =
       `${formatPrice(
         currentBooking.unit_price
@@ -577,6 +605,13 @@
       bookingStatusLabel(
         currentBooking.status
       );
+
+    paymentStatusBadge.className =
+      `pill status-${String(
+        currentBooking.status || "unknown"
+      )
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")}`;
 
     renderWorkspaceImage();
   }
@@ -598,14 +633,14 @@
           "00:00";
 
         payNowButton.disabled = true;
+
         clearCountdown();
 
         if (!expiryProcessing) {
           expiryProcessing = true;
 
-          await synchronizeExpiredBookings();
-
           try {
+            await refreshReservationStatuses();
             await reloadBookingState();
           } finally {
             expiryProcessing = false;
@@ -616,10 +651,14 @@
       }
 
       const totalSeconds =
-        Math.floor(remaining / 1000);
+        Math.floor(
+          remaining / 1000
+        );
 
       const minutes =
-        Math.floor(totalSeconds / 60);
+        Math.floor(
+          totalSeconds / 60
+        );
 
       const seconds =
         totalSeconds % 60;
@@ -687,7 +726,10 @@
       }
 
       showPaymentForm();
-      payNowButton.disabled = false;
+
+      payNowButton.disabled =
+        false;
+
       startPaymentCountdown();
 
       return;
@@ -712,7 +754,9 @@
     ) {
       showPaymentUnavailable(
         "Reservation cancelled",
-        "This reservation has been cancelled."
+        paymentStatus === "refunded"
+          ? "This reservation was cancelled and the payment was refunded."
+          : "This reservation has been cancelled."
       );
 
       return;
@@ -723,7 +767,7 @@
     ) {
       showPaymentUnavailable(
         "Reservation completed",
-        "This workspace reservation has already been used."
+        "This workspace reservation has already ended."
       );
 
       return;
@@ -759,7 +803,8 @@
         `${digits.slice(0, 2)}/` +
         `${digits.slice(2)}`;
     } else {
-      cardExpiry.value = digits;
+      cardExpiry.value =
+        digits;
     }
   }
 
@@ -847,10 +892,13 @@
 
     currentPayment = {
       ...currentPayment,
+
       status:
         result.payment_status,
+
       payment_reference:
         result.payment_reference,
+
       amount:
         result.total
     };
@@ -889,7 +937,7 @@
         );
 
       if (expired) {
-        await synchronizeExpiredBookings();
+        await refreshReservationStatuses();
         await reloadBookingState();
       } else {
         setPaymentMessage(
@@ -901,6 +949,38 @@
         payNowButton.disabled = false;
       }
     }
+  }
+
+  function registerPaymentFormListeners() {
+    cardNumber.addEventListener(
+      "input",
+      formatCardNumberInput
+    );
+
+    cardExpiry.addEventListener(
+      "input",
+      formatExpiryInput
+    );
+
+    cardCvv.addEventListener(
+      "input",
+      () => {
+        cardCvv.value =
+          cardCvv.value
+            .replace(/\D/g, "")
+            .slice(0, 3);
+      }
+    );
+
+    paymentForm.addEventListener(
+      "submit",
+      handlePaymentSubmit
+    );
+
+    window.addEventListener(
+      "beforeunload",
+      clearCountdown
+    );
   }
 
   async function initializePaymentPage() {
@@ -920,20 +1000,22 @@
         currentUser
       );
 
-    paymentCustomerName.value =
+    const displayName =
       getDisplayName(
         currentUser,
         currentProfile
       );
+
+    paymentCustomerName.value =
+      displayName;
 
     paymentCustomerEmail.value =
       currentUser.email || "";
 
     cardholderName.value =
-      getDisplayName(
-        currentUser,
-        currentProfile
-      );
+      displayName;
+
+    registerPaymentFormListeners();
 
     const bookingId =
       getBookingId();
@@ -986,12 +1068,23 @@
         currentBooking.expires_at
       ).getTime() <= Date.now()
     ) {
-      await synchronizeExpiredBookings();
+      await refreshReservationStatuses();
 
       currentBooking =
         await loadBooking(
           bookingId
         );
+    }
+
+    if (!currentBooking) {
+      showContent();
+
+      showPaymentUnavailable(
+        "Reservation not found",
+        "The reservation could no longer be loaded."
+      );
+
+      return;
     }
 
     currentWorkspace =
@@ -1005,36 +1098,6 @@
       );
 
     renderPaymentState();
-
-    cardNumber.addEventListener(
-      "input",
-      formatCardNumberInput
-    );
-
-    cardExpiry.addEventListener(
-      "input",
-      formatExpiryInput
-    );
-
-    cardCvv.addEventListener(
-      "input",
-      () => {
-        cardCvv.value =
-          cardCvv.value
-            .replace(/\D/g, "")
-            .slice(0, 3);
-      }
-    );
-
-    paymentForm.addEventListener(
-      "submit",
-      handlePaymentSubmit
-    );
-
-    window.addEventListener(
-      "beforeunload",
-      clearCountdown
-    );
   }
 
   async function start() {
@@ -1069,7 +1132,9 @@
     document.addEventListener(
       "DOMContentLoaded",
       start,
-      { once: true }
+      {
+        once: true
+      }
     );
   } else {
     void start();
