@@ -2,25 +2,83 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    >
+
     <title>Book a Space | SyncSpace</title>
-    <meta name="description" content="Browse available SyncSpace rooms by date and time, then submit a booking request online.">
-    <link rel="preconnect" href="https://images.unsplash.com">
-    <link rel="stylesheet" href="styles.css">
+
+    <meta
+      name="description"
+      content="Browse available SyncSpace rooms by date and time, then submit a booking request online."
+    >
+
+    <link
+      rel="preconnect"
+      href="https://images.unsplash.com"
+    >
+
+    <link
+      rel="stylesheet"
+      href="styles.css"
+    >
   </head>
+
   <body>
     <header class="site-header">
-      <a class="brand" href="index.html" aria-label="SyncSpace home">
-        <img src="assets/syncspace-logo-mark.png" alt="SyncSpace Coworking Space">
+      <a
+        class="brand"
+        href="index.html"
+        aria-label="SyncSpace home"
+      >
+        <img
+          src="assets/syncspace-logo-mark.png"
+          alt="SyncSpace Coworking Space"
+        >
       </a>
-      <nav class="main-nav" aria-label="Primary navigation">
+
+      <nav
+        class="main-nav"
+        aria-label="Primary navigation"
+      >
         <a href="index.html#about">About</a>
         <a href="index.html#spaces">Spaces</a>
         <a href="index.html#benefits">Benefits</a>
-        <a class="nav-cta" href="booking.html">Book a Space</a>
-        <a href="profile.html" id="navProfile" class="nav-profile" style="display:none">Profile</a>
-        <button type="button" id="navLogin" class="nav-login">Log in</button>
-        <button type="button" id="navLogout" class="nav-logout" style="display:none">Log out</button>
+
+        <a
+          class="nav-cta"
+          href="booking.html"
+        >
+          Book a Space
+        </a>
+
+        <a
+          href="profile.html"
+          id="navProfile"
+          class="nav-profile"
+          style="display: none"
+        >
+          Profile
+        </a>
+
+        <button
+          type="button"
+          id="navLogin"
+          class="nav-login"
+        >
+          Log in
+        </button>
+
+        <button
+          type="button"
+          id="navLogout"
+          class="nav-logout"
+          style="display: none"
+        >
+          Log out
+        </button>
       </nav>
     </header>
 
@@ -32,114 +90,279 @@
         </div>
       </section>
 
-      <section class="booking-shell" aria-label="Room booking interface">
-        <form class="filters" id="filters">
-          <fieldset class="filter-group date-group" aria-label="Date range">
+      <section
+        class="booking-shell"
+        aria-label="Room booking interface"
+      >
+        <form
+          class="filters"
+          id="filters"
+        >
+          <fieldset
+            class="filter-group date-group"
+            aria-label="Date range"
+          >
             <label>
               <span>Start date</span>
-              <input type="date" id="startDate" name="startDate" required>
+
+              <input
+                type="date"
+                id="startDate"
+                name="startDate"
+                required
+              >
             </label>
+
             <label>
               <span>End date</span>
-              <input type="date" id="endDate" name="endDate" required>
+
+              <input
+                type="date"
+                id="endDate"
+                name="endDate"
+                required
+              >
             </label>
           </fieldset>
-          <fieldset class="filter-group time-group" aria-label="Time">
+
+          <fieldset
+            class="filter-group time-group"
+            aria-label="Time"
+          >
             <label>
               <span>Time</span>
-              <select id="timeSlot" name="timeSlot" required>
-                <option value="09:00 - 12:00">09:00 - 12:00</option>
-                <option value="13:00 - 17:00">13:00 - 17:00</option>
-                <option value="18:00 - 21:00">18:00 - 21:00</option>
-                <option value="Full day">Full day</option>
+
+              <select
+                id="timeSlot"
+                name="timeSlot"
+                required
+              >
+                <option value="09:00 - 12:00">
+                  09:00 - 12:00
+                </option>
+
+                <option value="13:00 - 17:00">
+                  13:00 - 17:00
+                </option>
+
+                <option value="18:00 - 21:00">
+                  18:00 - 21:00
+                </option>
+
+                <option value="Full day">
+                  Full day
+                </option>
               </select>
             </label>
           </fieldset>
+
           <label class="room-type-filter">
             <span>Room type</span>
-            <select id="roomType" name="roomType">
-              <option value="all">All room types</option>
-              <option value="Hot Desk">Hot Desk</option>
-              <option value="Meeting Room">Meeting Room</option>
-              <option value="Private Suite">Private Suite</option>
-              <option value="Event Space">Event Space</option>
+
+            <select
+              id="roomType"
+              name="roomType"
+            >
+              <option value="all">
+                All room types
+              </option>
+
+              <option value="Hot Desk">
+                Hot Desk
+              </option>
+
+              <option value="Meeting Room">
+                Meeting Room
+              </option>
+
+              <option value="Private Suite">
+                Private Suite
+              </option>
+
+              <option value="Event Space">
+                Event Space
+              </option>
             </select>
           </label>
+
           <label class="pax-filter">
             <span>Pax</span>
-            <input type="number" id="peopleCount" name="peopleCount" min="1" max="80" value="2">
+
+            <input
+              type="number"
+              id="peopleCount"
+              name="peopleCount"
+              min="1"
+              max="80"
+              value="2"
+            >
           </label>
+
           <label class="checkbox-label">
-            <input type="checkbox" id="availableOnly">
+            <input
+              type="checkbox"
+              id="availableOnly"
+            >
+
             <span>Hide unavailable</span>
           </label>
         </form>
 
         <div class="room-toolbar">
-          <p id="roomCount">Showing available rooms</p>
-          <div class="scroll-actions" aria-label="Room carousel controls">
-            <button type="button" class="icon-button" id="scrollLeft" aria-label="Scroll rooms left">‹</button>
-            <button type="button" class="icon-button" id="scrollRight" aria-label="Scroll rooms right">›</button>
+          <p id="roomCount">
+            Showing available rooms
+          </p>
+
+          <div
+            class="scroll-actions"
+            aria-label="Room carousel controls"
+          >
+            <button
+              type="button"
+              class="icon-button"
+              id="scrollLeft"
+              aria-label="Scroll rooms left"
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              class="icon-button"
+              id="scrollRight"
+              aria-label="Scroll rooms right"
+            >
+              ›
+            </button>
           </div>
         </div>
 
-        <div class="room-strip" id="roomStrip" aria-live="polite"></div>
+        <div
+          class="room-strip"
+          id="roomStrip"
+          aria-live="polite"
+        ></div>
       </section>
 
-      <section class="booking-panel" id="bookingPanel">
+      <section
+        class="booking-panel"
+        id="bookingPanel"
+      >
         <div>
           <p class="eyebrow">Selected room</p>
-          <h2 id="selectedRoomName">Choose a room to continue</h2>
-          <dl class="summary-list" id="bookingSummary">
+
+          <h2 id="selectedRoomName">
+            Choose a room to continue
+          </h2>
+
+          <dl
+            class="summary-list"
+            id="bookingSummary"
+          >
             <div>
               <dt>Date</dt>
               <dd id="summaryDate">-</dd>
             </div>
+
             <div>
               <dt>Time</dt>
               <dd id="summaryTime">-</dd>
             </div>
+
             <div>
               <dt>Total</dt>
               <dd id="summaryTotal">-</dd>
             </div>
           </dl>
         </div>
-        <form class="booking-form" id="bookingForm">
+
+        <form
+          class="booking-form"
+          id="bookingForm"
+        >
           <label>
             <span>Name</span>
-            <input type="text" id="customerName" placeholder="Log in to continue" readonly required>
+
+            <input
+              type="text"
+              id="customerName"
+              placeholder="Log in to continue"
+              readonly
+              required
+            >
           </label>
+
           <label>
             <span>Email</span>
-            <input type="email" id="customerEmail" placeholder="Log in to continue" readonly required>
+
+            <input
+              type="email"
+              id="customerEmail"
+              placeholder="Log in to continue"
+              readonly
+              required
+            >
           </label>
-          <button class="button primary" type="submit">Confirm booking</button>
-          <p class="form-message" id="formMessage" role="status"></p>
+
+          <button
+            class="button primary"
+            type="submit"
+          >
+            Confirm booking
+          </button>
+
+          <p
+            class="form-message"
+            id="formMessage"
+            role="status"
+            aria-live="polite"
+          ></p>
         </form>
       </section>
 
-      <section class="social-section" id="stories">
+      <section
+        class="social-section"
+        id="stories"
+      >
         <div class="social-heading">
           <div>
             <p class="eyebrow">Social proof</p>
             <h2>Workspace stories</h2>
           </div>
-          <button type="button" class="button secondary share-btn" id="shareStories" aria-label="Copy link to Workspace stories">
-            <span class="share-icon">&#x1f517;</span> Share
+
+          <button
+            type="button"
+            class="button secondary share-btn"
+            id="shareStories"
+            aria-label="Copy link to Workspace stories"
+          >
+            <span class="share-icon">&#x1f517;</span>
+            Share
           </button>
         </div>
-        <div class="juicer-embed" aria-label="SyncSpace social media feed">
-          <script type="text/javascript" src="https://www.juicer.io/embed/wnasyikinn/embed-code.js" async defer></script>
+
+        <div
+          class="juicer-embed"
+          aria-label="SyncSpace social media feed"
+        >
+          <script
+            src="https://www.juicer.io/embed/wnasyikinn/embed-code.js"
+            async
+            defer
+          ></script>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
       <span>SyncSpace</span>
-      <span>Bookings shown here are demo requests until connected to a backend.</span>
+
+      <span>
+        Account and booking data are managed through Supabase.
+      </span>
     </footer>
 
+    <!-- Load each application script once, in this exact order. -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
