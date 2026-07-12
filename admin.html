@@ -381,10 +381,6 @@
                   Completed
                 </option>
 
-                <option value="cancel_requested">
-                  Cancellation requested
-                </option>
-
                 <option value="cancelled">
                   Cancelled
                 </option>
@@ -458,10 +454,6 @@
 
                 <option value="failed">
                   Failed
-                </option>
-
-                <option value="refund_pending">
-                  Refund pending
                 </option>
 
                 <option value="refunded">
@@ -655,7 +647,7 @@
           <div class="payment-form-row">
             <label>
               <span>Maximum capacity</span>
-
+          
               <input
                 type="number"
                 id="workspaceCapacity"
@@ -664,13 +656,65 @@
                 required
               >
             </label>
-
+          
             <label>
-              <span>Price per day (RM)</span>
-
+              <span>Display order</span>
+          
               <input
                 type="number"
-                id="workspacePrice"
+                id="workspaceDisplayOrder"
+                min="0"
+                value="0"
+                required
+              >
+            </label>
+          </div>
+          
+          <div class="payment-form-row">
+            <label>
+              <span>09:00–12:00 price (RM)</span>
+          
+              <input
+                type="number"
+                id="workspaceMorningPrice"
+                min="0"
+                step="0.01"
+                required
+              >
+            </label>
+          
+            <label>
+              <span>13:00–17:00 price (RM)</span>
+          
+              <input
+                type="number"
+                id="workspaceAfternoonPrice"
+                min="0"
+                step="0.01"
+                required
+              >
+            </label>
+          </div>
+          
+          <div class="payment-form-row">
+            <label>
+              <span>18:00–21:00 price (RM)</span>
+          
+              <input
+                type="number"
+                id="workspaceEveningPrice"
+                min="0"
+                step="0.01"
+                required
+              >
+            </label>
+          
+            <label>
+              <span>Full-day price (RM)</span>
+          
+              <input
+                type="number"
+                id="workspaceFullDayPrice"
                 min="0"
                 step="0.01"
                 required
