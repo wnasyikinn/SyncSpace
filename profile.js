@@ -332,6 +332,46 @@
     return data ?? [];
   }
 
+  function getSingleRpcResult(data) {
+    if (Array.isArray(data)) {
+      return data[0] ?? null;
+    }
+
+    return data ?? null;
+  }
+
+  async function verifyRefundRequest(
+    refundId,
+    bookingId
+  ) {
+    const { data, error } =
+      await getSupabaseClient()
+        .from("refunds")
+        .select(`
+          id,
+          booking_id,
+          status,
+          reason,
+          requested_at
+        `)
+        .eq("id", refundId)
+        .eq("booking_id", bookingId)
+        .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error(
+        "The refund request was returned by the service " +
+        "but could not be verified in the database."
+      );
+    }
+
+    return data;
+  }
+  
   function classifyReservations() {
     const now = Date.now();
   
@@ -904,15 +944,21 @@
     );
   }
 
+  async function refreshReservations() {
+    reservations =
+      await getReservations();
+
+    renderReservations();
+
+    return reservations;
+  }
+
   async function loadReservations() {
     setLoadingState();
     setPageMessage("");
 
     try {
-      reservations =
-        await getReservations();
-
-      renderReservations();
+      await refreshReservations();
     } catch (error) {
       console.error(
         "Unable to load reservations:",
@@ -1179,8 +1225,11 @@
     );
 
     try {
-      const { error } =
-        await getSupabaseClient().rpc(
+      const client =
+        getSupabaseClient();
+
+      const { data, error } =
+        await client.rpc(
           REQUEST_CANCELLATION_RPC,
           {
             p_booking_id:
@@ -1195,8 +1244,78 @@
         throw error;
       }
 
-      await loadReservations();
-      
+      const result =
+        getSingleRpcResult(data);
+
+      /*
+       * The database RPC must return the created
+       * refund ID and requested refund status.
+       */
+      if (
+        !result?.refund_id ||
+        String(result.booking_id) !==
+          String(bookingId) ||
+        result.refund_status !==
+          "requested"
+      ) {
+        console.error(
+          "Unexpected cancellation RPC result:",
+          data
+        );
+
+        throw new Error(
+          "The cancellation service did not create " +
+          "a valid refund request."
+        );
+      }
+
+      /*
+       * Verify that the refund record can actually
+       * be retrieved from the refunds table.
+       */
+      const savedRefund =
+        await verifyRefundRequest(
+          result.refund_id,
+          bookingId
+        );
+
+      if (
+        savedRefund.status !==
+        "requested"
+      ) {
+        throw new Error(
+          "The refund request was created with an " +
+          "unexpected status."
+        );
+      }
+
+      /*
+       * Reload the reservation RPC without swallowing
+       * refresh errors.
+       */
+      await refreshReservations();
+
+      const refreshedReservation =
+        reservations.find(
+          (item) =>
+            item.id === bookingId
+        );
+
+      /*
+       * Confirm that get_my_reservations() now returns
+       * the refund request for the selected booking.
+       */
+      if (
+        !refreshedReservation ||
+        refreshedReservation.refund_status !==
+          "requested"
+      ) {
+        throw new Error(
+          "The refund request was saved, but the " +
+          "updated reservation status could not be loaded."
+        );
+      }
+
       setPageMessage(
         "Your cancellation and refund request was submitted successfully.",
         "success"
@@ -1213,7 +1332,13 @@
         "error"
       );
 
-      button.disabled = false;
+      /*
+       * The original button may have been replaced if
+       * the reservation cards were rerendered.
+       */
+      if (button.isConnected) {
+        button.disabled = false;
+      }
     }
   }
 
