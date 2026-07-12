@@ -192,46 +192,24 @@
 
   function bookingStatusLabel(status) {
     const labels = {
-      pending_payment:
-        "Pending payment",
-
-      confirmed:
-        "Confirmed",
-
-      completed:
-        "Completed",
-
-      cancel_requested:
-        "Cancellation requested",
-
-      cancelled:
-        "Cancelled",
-
-      expired:
-        "Expired"
+      pending_payment: "Pending payment",
+      confirmed: "Confirmed",
+      completed: "Completed",
+      cancelled: "Cancelled",
+      expired: "Expired"
     };
-
+  
     return labels[status] || "Unknown";
   }
 
   function paymentStatusLabel(status) {
     const labels = {
-      pending:
-        "Pending",
-
-      paid:
-        "Paid",
-
-      failed:
-        "Failed",
-
-      refund_pending:
-        "Refund pending",
-
-      refunded:
-        "Refunded"
+      pending: "Pending",
+      paid: "Paid",
+      failed: "Failed",
+      refunded: "Refunded"
     };
-
+  
     return labels[status] || "Not available";
   }
 
@@ -356,7 +334,7 @@
 
   function classifyReservations() {
     const now = Date.now();
-
+  
     const pendingPayments =
       reservations
         .filter((reservation) => {
@@ -371,7 +349,7 @@
           new Date(a.starts_at) -
           new Date(b.starts_at)
         );
-
+  
     const upcoming =
       reservations
         .filter((reservation) => {
@@ -387,42 +365,35 @@
           new Date(a.starts_at) -
           new Date(b.starts_at)
         );
-
+  
     const cancellationAndRefund =
       reservations
         .filter((reservation) => {
-          return (
-            reservation.booking_status ===
-              "cancel_requested" ||
-            reservation.booking_status ===
-              "cancelled" ||
-            Boolean(
-              reservation.refund_status
-            )
+          return Boolean(
+            reservation.refund_status
           );
         })
         .sort((a, b) =>
           new Date(b.starts_at) -
           new Date(a.starts_at)
         );
-
+  
     const past =
       reservations
         .filter((reservation) => {
-          return (
-            reservation.booking_status ===
-              "completed" ||
-            reservation.booking_status ===
-              "cancelled" ||
-            reservation.booking_status ===
-              "expired"
+          return [
+            "completed",
+            "cancelled",
+            "expired"
+          ].includes(
+            reservation.booking_status
           );
         })
         .sort((a, b) =>
           new Date(b.starts_at) -
           new Date(a.starts_at)
         );
-
+  
     return {
       pendingPayments,
       upcoming,
@@ -636,6 +607,39 @@
   function upcomingReservationCard(
     reservation
   ) {
+    const openRefundStatuses = [
+      "requested",
+      "approved",
+      "processing"
+    ];
+  
+    const hasOpenRequest =
+      openRefundStatuses.includes(
+        reservation.refund_status
+      );
+  
+    const action = hasOpenRequest
+      ? `
+        <button
+          type="button"
+          class="button secondary"
+          disabled
+        >
+          Cancellation request submitted
+        </button>
+      `
+      : `
+        <button
+          type="button"
+          class="button secondary cancel-booking-button"
+          data-cancel-booking-id="${escapeHtml(
+            reservation.id
+          )}"
+        >
+          Request cancellation
+        </button>
+      `;
+  
     return `
       <article
         class="reservation-card"
@@ -647,28 +651,18 @@
           ${createReservationHeading(
             reservation
           )}
-
-          <span
-            class="pill status-confirmed"
-          >
+  
+          <span class="pill status-confirmed">
             Confirmed
           </span>
         </div>
-
+  
         ${createReservationDetails(
           reservation
         )}
-
+  
         <div class="reservation-card-actions">
-          <button
-            type="button"
-            class="button secondary cancel-booking-button"
-            data-cancel-booking-id="${escapeHtml(
-              reservation.id
-            )}"
-          >
-            Request cancellation
-          </button>
+          ${action}
         </div>
       </article>
     `;
