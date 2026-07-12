@@ -618,8 +618,19 @@
         reservation.refund_status
       );
   
-    const action = hasOpenRequest
-      ? `
+    const startsAt =
+      new Date(
+        reservation.starts_at
+      ).getTime();
+  
+    const hasStarted =
+      Number.isFinite(startsAt) &&
+      startsAt <= Date.now();
+  
+    let action;
+  
+    if (hasOpenRequest) {
+      action = `
         <button
           type="button"
           class="button secondary"
@@ -627,8 +638,19 @@
         >
           Cancellation request submitted
         </button>
-      `
-      : `
+      `;
+    } else if (hasStarted) {
+      action = `
+        <button
+          type="button"
+          class="button secondary"
+          disabled
+        >
+          Cancellation unavailable after start
+        </button>
+      `;
+    } else {
+      action = `
         <button
           type="button"
           class="button secondary cancel-booking-button"
@@ -639,6 +661,7 @@
           Request cancellation
         </button>
       `;
+    }
   
     return `
       <article
