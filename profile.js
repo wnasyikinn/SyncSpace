@@ -1172,12 +1172,12 @@
         throw error;
       }
 
+      await loadReservations();
+      
       setPageMessage(
         "Your cancellation and refund request was submitted successfully.",
         "success"
       );
-
-      await loadReservations();
     } catch (error) {
       console.error(
         "Cancellation request failed:",
