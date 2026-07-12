@@ -77,10 +77,6 @@
   let searchRequestNumber = 0;
   let searchTimer = null;
 
-  /**
-   * Confirms that booking.html contains all
-   * required elements.
-   */
   function assertRequiredElements() {
     const requiredElements = {
       roomStrip,
@@ -118,9 +114,6 @@
     }
   }
 
-  /**
-   * Returns the current local date as YYYY-MM-DD.
-   */
   function todayIso() {
     const now = new Date();
 
@@ -129,18 +122,16 @@
       now.getTimezoneOffset() * 60000
     );
 
-    return localDate.toISOString().slice(0, 10);
+    return localDate
+      .toISOString()
+      .slice(0, 10);
   }
 
-  /**
-   * Calculates the inclusive number of booking days.
-   *
-   * Example:
-   * 12 July to 12 July = 1 day
-   * 12 July to 13 July = 2 days
-   */
   function getBookingDays() {
-    if (!startDate.value || !endDate.value) {
+    if (
+      !startDate.value ||
+      !endDate.value
+    ) {
       return 1;
     }
 
@@ -157,33 +148,40 @@
 
     return Math.max(
       Math.floor(
-        (end - start) / millisecondsPerDay
+        (end - start) /
+        millisecondsPerDay
       ) + 1,
       1
     );
   }
 
-  /**
-   * Reads the current search values.
-   */
   function getSearchValues() {
     return {
-      startDate: startDate.value,
-      endDate: endDate.value,
-      timeSlot: timeSlot.value,
-      roomType: roomType.value,
-      partySize: Number(
-        peopleCount.value || 1
-      )
+      startDate:
+        startDate.value,
+
+      endDate:
+        endDate.value,
+
+      timeSlot:
+        timeSlot.value,
+
+      roomType:
+        roomType.value,
+
+      partySize:
+        Number(
+          peopleCount.value || 1
+        )
     };
   }
 
-  /**
-   * Validates the selected booking details.
-   */
   function validateSearchValues() {
-    const values = getSearchValues();
-    const today = todayIso();
+    const values =
+      getSearchValues();
+
+    const today =
+      todayIso();
 
     if (
       !values.startDate ||
@@ -194,7 +192,9 @@
       );
     }
 
-    if (values.startDate < today) {
+    if (
+      values.startDate < today
+    ) {
       throw new Error(
         "The start date cannot be in the past."
       );
@@ -209,8 +209,16 @@
       );
     }
 
+    if (!values.timeSlot) {
+      throw new Error(
+        "Select a booking time."
+      );
+    }
+
     if (
-      !Number.isInteger(values.partySize) ||
+      !Number.isInteger(
+        values.partySize
+      ) ||
       values.partySize < 1
     ) {
       throw new Error(
@@ -221,23 +229,20 @@
     return values;
   }
 
-  /**
-   * Formats a numeric value as Malaysian Ringgit.
-   */
   function formatPrice(value) {
     return new Intl.NumberFormat(
       "en-MY",
       {
         style: "currency",
         currency: "MYR",
-        maximumFractionDigits: 0
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
       }
-    ).format(Number(value || 0));
+    ).format(
+      Number(value || 0)
+    );
   }
 
-  /**
-   * Formats a YYYY-MM-DD value for display.
-   */
   function formatDate(isoDate) {
     const date = new Date(
       `${isoDate}T00:00:00`
@@ -253,9 +258,6 @@
     ).format(date);
   }
 
-  /**
-   * Formats the selected date range.
-   */
   function formatDateRange() {
     if (
       !startDate.value ||
@@ -274,14 +276,15 @@
     }
 
     return (
-      `${formatDate(startDate.value)} to ` +
-      `${formatDate(endDate.value)}`
+      `${formatDate(
+        startDate.value
+      )} to ` +
+      `${formatDate(
+        endDate.value
+      )}`
     );
   }
 
-  /**
-   * Escapes text before inserting it into HTML.
-   */
   function escapeHtml(value) {
     const div =
       document.createElement("div");
@@ -292,10 +295,6 @@
     return div.innerHTML;
   }
 
-  /**
-   * Prevents an invalid database image URL from
-   * being inserted into the page.
-   */
   function safeImageUrl(value) {
     try {
       const url = new URL(
@@ -310,104 +309,120 @@
         return url.href;
       }
     } catch {
-      // Use the fallback image below.
+      // Use the local fallback below.
     }
 
-    return "assets/syncspace-logo.png";
+    return (
+      "assets/" +
+      "syncspace-logo-mark.png"
+    );
   }
 
-  /**
-   * Converts the availability RPC output into
-   * the format used by this page.
-   */
+  function toBoolean(value) {
+    return (
+      value === true ||
+      value === 1 ||
+      value === "true"
+    );
+  }
+
   function normalizeWorkspace(row) {
     return {
-      id: String(
-        row.workspace_id ??
-        row.id ??
-        ""
-      ),
+      id:
+        String(
+          row.workspace_id ??
+          row.id ??
+          ""
+        ),
 
-      unitCode: String(
-        row.unit_code ??
-        ""
-      ),
+      unitCode:
+        String(
+          row.unit_code ??
+          ""
+        ),
 
-      name: String(
-        row.workspace_name ??
-        row.name ??
-        "Workspace"
-      ),
+      name:
+        String(
+          row.workspace_name ??
+          row.name ??
+          "Workspace"
+        ),
 
-      type: String(
-        row.workspace_type ??
-        row.room_type ??
-        "Workspace"
-      ),
+      type:
+        String(
+          row.workspace_type ??
+          row.room_type ??
+          "Workspace"
+        ),
 
-      layout: String(
-        row.layout ??
-        row.description ??
-        "Workspace details available on request."
-      ),
+      layout:
+        String(
+          row.layout ??
+          row.description ??
+          "Workspace details available on request."
+        ),
 
-      capacity: Number(
-        row.capacity ?? 1
-      ),
+      capacity:
+        Number(
+          row.capacity ?? 1
+        ),
 
-      price: Number(
-        row.price ??
-        row.base_price ??
-        0
-      ),
+      price:
+        Number(
+          row.price ??
+          row.base_price ??
+          0
+        ),
 
-      image: safeImageUrl(
-        row.image_url ??
-        row.image
-      ),
+      image:
+        safeImageUrl(
+          row.image_url ??
+          row.image
+        ),
 
-      available: Boolean(
-        row.is_available ??
-        row.available
-      ),
+      available:
+        toBoolean(
+          row.is_available ??
+          row.available
+        ),
 
-      unavailableReason: String(
-        row.unavailable_reason ??
-        "Already reserved"
-      )
+      unavailableReason:
+        String(
+          row.unavailable_reason ??
+          "Already reserved"
+        )
     };
   }
 
-  /**
-   * Displays booking form feedback.
-   */
   function setFormMessage(
     message,
     status = ""
   ) {
-    formMessage.textContent = message;
-    formMessage.dataset.status = status;
+    formMessage.textContent =
+      message;
+
+    formMessage.dataset.status =
+      status;
   }
 
-  /**
-   * Clears the currently selected workspace.
-   */
   function resetSelectedWorkspace() {
     selectedWorkspace = null;
 
     selectedRoomName.textContent =
       "Choose a workspace to continue";
 
-    summaryDate.textContent = "-";
-    summaryTime.textContent = "-";
-    summaryTotal.textContent = "-";
+    summaryDate.textContent =
+      "-";
+
+    summaryTime.textContent =
+      "-";
+
+    summaryTotal.textContent =
+      "-";
 
     setFormMessage("");
   }
 
-  /**
-   * Updates the selected workspace summary.
-   */
   function updateSummary() {
     if (!selectedWorkspace) {
       resetSelectedWorkspace();
@@ -436,12 +451,11 @@
       timeSlot.value;
 
     summaryTotal.textContent =
-      `${formatPrice(estimatedTotal)} estimated`;
+      `${formatPrice(
+        estimatedTotal
+      )} estimated`;
   }
 
-  /**
-   * Displays workspace units returned by Supabase.
-   */
   function renderWorkspaces() {
     const visibleWorkspaces =
       availableOnly.checked
@@ -460,7 +474,11 @@
     roomCount.textContent =
       `${availableCount} available of ` +
       `${workspaces.length} matching ` +
-      `workspace${workspaces.length === 1 ? "" : "s"}`;
+      `workspace${
+        workspaces.length === 1
+          ? ""
+          : "s"
+      }`;
 
     roomStrip.innerHTML = "";
 
@@ -480,7 +498,9 @@
     visibleWorkspaces.forEach(
       (workspace) => {
         const card =
-          document.createElement("article");
+          document.createElement(
+            "article"
+          );
 
         card.className =
           `room-card ${
@@ -499,16 +519,21 @@
 
         card.innerHTML = `
           <img
-            src="${escapeHtml(workspace.image)}"
-            alt="${escapeHtml(title)}
-                 ${escapeHtml(workspace.type)}"
+            src="${escapeHtml(
+              workspace.image
+            )}"
+            alt="${escapeHtml(
+              `${title} ${workspace.type}`
+            )}"
           >
 
           <div class="room-card-body">
             <div class="room-card-top">
               <div>
                 <span class="pill">
-                  ${escapeHtml(workspace.type)}
+                  ${escapeHtml(
+                    workspace.type
+                  )}
                 </span>
 
                 <h3>
@@ -532,18 +557,27 @@
             </div>
 
             <p>
-              ${escapeHtml(workspace.layout)}
+              ${escapeHtml(
+                workspace.layout
+              )}
             </p>
 
             <div class="room-meta">
               <span>
-                Maximum ${workspace.capacity} pax
+                Maximum
+                ${escapeHtml(
+                  workspace.capacity
+                )}
+                pax
               </span>
 
               <span class="room-price">
                 ${escapeHtml(
-                  formatPrice(workspace.price)
-                )} / booked day for selected time
+                  formatPrice(
+                    workspace.price
+                  )
+                )}
+                / booked day for selected time
               </span>
             </div>
 
@@ -566,9 +600,9 @@
                   : "disabled"
               }"
               type="button"
-              data-workspace-id="${
-                escapeHtml(workspace.id)
-              }"
+              data-workspace-id="${escapeHtml(
+                workspace.id
+              )}"
               ${
                 workspace.available
                   ? ""
@@ -584,18 +618,13 @@
           </div>
         `;
 
-        roomStrip.appendChild(card);
+        roomStrip.appendChild(
+          card
+        );
       }
     );
   }
 
-  /**
-   * Requests actual availability from Supabase.
-   *
-   * The database function should return all matching
-   * workspace units and indicate whether each one is
-   * available.
-   */
   async function loadWorkspaceAvailability() {
     const requestNumber =
       ++searchRequestNumber;
@@ -635,10 +664,6 @@
         }
       );
 
-    /*
-     * Ignore an older response if the user changed
-     * the filters while a request was still running.
-     */
     if (
       requestNumber !==
       searchRequestNumber
@@ -675,20 +700,22 @@
     renderWorkspaces();
   }
 
-  /**
-   * Prevents repeated database calls while the user
-   * is still changing filter values.
-   */
   function scheduleAvailabilityRefresh(
     delay = 250
   ) {
-    window.clearTimeout(searchTimer);
+    window.clearTimeout(
+      searchTimer
+    );
+
+    /*
+     * The booking criteria changed, so the previous
+     * workspace selection is no longer valid.
+     */
+    resetSelectedWorkspace();
 
     searchTimer =
       window.setTimeout(
         async () => {
-          resetSelectedWorkspace();
-
           try {
             await loadWorkspaceAvailability();
           } catch (error) {
@@ -711,9 +738,6 @@
       );
   }
 
-  /**
-   * Selects one actual workspace unit.
-   */
   function selectWorkspace(
     workspaceId
   ) {
@@ -736,9 +760,11 @@
       return;
     }
 
-    selectedWorkspace = workspace;
+    selectedWorkspace =
+      workspace;
 
     updateSummary();
+
     setFormMessage("");
 
     bookingPanel.scrollIntoView({
@@ -747,9 +773,6 @@
     });
   }
 
-  /**
-   * Displays the authenticated customer's details.
-   */
   async function prefillFromUser(
     providedUser = undefined
   ) {
@@ -777,17 +800,6 @@
       user.email ?? "";
   }
 
-  /**
-   * Creates a temporary pending-payment reservation.
-   *
-   * The database function must:
-   * - identify the authenticated user;
-   * - check availability again;
-   * - prevent overlapping reservations;
-   * - calculate the official total;
-   * - create a pending_payment booking;
-   * - return the new booking ID.
-   */
   async function createPendingBookingAndContinue() {
     if (!selectedWorkspace) {
       setFormMessage(
@@ -823,7 +835,14 @@
         'button[type="submit"]'
       );
 
-    submitButton.disabled = true;
+    if (!submitButton) {
+      throw new Error(
+        "The booking submit button was not found."
+      );
+    }
+
+    submitButton.disabled =
+      true;
 
     setFormMessage(
       "Reserving the workspace and preparing payment...",
@@ -861,7 +880,11 @@
           ? data[0]
           : data;
 
-      if (!booking?.id) {
+      const bookingId =
+        booking?.id ??
+        booking?.booking_id;
+
+      if (!bookingId) {
         throw new Error(
           "The booking service did not return " +
           "a booking reference."
@@ -870,7 +893,7 @@
 
       sessionStorage.setItem(
         PENDING_BOOKING_KEY,
-        String(booking.id)
+        String(bookingId)
       );
 
       const paymentUrl =
@@ -881,7 +904,7 @@
 
       paymentUrl.searchParams.set(
         "booking",
-        String(booking.id)
+        String(bookingId)
       );
 
       window.location.href =
@@ -895,17 +918,27 @@
       const conflictDetected =
         error.code === "23P01" ||
         /already booked|not available|conflict|overlap/i
-          .test(error.message ?? "");
+          .test(
+            error.message ?? ""
+          );
 
       if (conflictDetected) {
+        resetSelectedWorkspace();
+
+        try {
+          await loadWorkspaceAvailability();
+        } catch (refreshError) {
+          console.error(
+            "Availability refresh after conflict failed:",
+            refreshError
+          );
+        }
+
         setFormMessage(
           "Another customer has just reserved this " +
           "workspace. Choose another available workspace.",
           "error"
         );
-
-        await loadWorkspaceAvailability();
-        resetSelectedWorkspace();
       } else if (
         error.message?.includes(
           CREATE_BOOKING_RPC
@@ -925,15 +958,16 @@
         );
       }
     } finally {
-      submitButton.disabled = false;
+      submitButton.disabled =
+        false;
     }
   }
 
-  /**
-   * Shares the social-media section using the device's
-   * share menu, with clipboard copying as a fallback.
-   */
   async function shareWorkspaceStories() {
+    if (!shareButton) {
+      return;
+    }
+
     const shareData = {
       title:
         "SyncSpace Workspace Stories",
@@ -964,11 +998,14 @@
       shareButton.textContent =
         "Link copied!";
 
-      window.setTimeout(() => {
-        shareButton.innerHTML =
-          '<span class="share-icon">' +
-          "&#x1f517;</span> Share";
-      }, 2000);
+      window.setTimeout(
+        () => {
+          shareButton.innerHTML =
+            '<span class="share-icon">' +
+            "&#x1f517;</span> Share";
+        },
+        2000
+      );
     } catch (error) {
       if (
         error.name !== "AbortError"
@@ -981,12 +1018,24 @@
     }
   }
 
-  /**
-   * Handles date, time, room type and checkbox changes.
-   */
-  function handleFilterChange(event) {
+  function handleFilterChange(
+    event
+  ) {
+    /*
+     * This checkbox only changes which existing cards
+     * are displayed. It does not change availability.
+     */
     if (
-      event.target === startDate
+      event.target ===
+      availableOnly
+    ) {
+      renderWorkspaces();
+      return;
+    }
+
+    if (
+      event.target ===
+      startDate
     ) {
       endDate.min =
         startDate.value;
@@ -994,7 +1043,7 @@
       if (
         !endDate.value ||
         endDate.value <
-          startDate.value
+        startDate.value
       ) {
         endDate.value =
           startDate.value;
@@ -1004,7 +1053,7 @@
     if (
       event.target === endDate &&
       endDate.value <
-        startDate.value
+      startDate.value
     ) {
       endDate.value =
         startDate.value;
@@ -1013,28 +1062,30 @@
     scheduleAvailabilityRefresh();
   }
 
-  /**
-   * Initializes the booking page.
-   */
   async function initializeBookingPage() {
     assertRequiredElements();
 
-    const today = todayIso();
+    const today =
+      todayIso();
 
-    startDate.min = today;
-    endDate.min = today;
+    startDate.min =
+      today;
+
+    endDate.min =
+      today;
 
     if (
       !startDate.value ||
       startDate.value < today
     ) {
-      startDate.value = today;
+      startDate.value =
+        today;
     }
 
     if (
       !endDate.value ||
       endDate.value <
-        startDate.value
+      startDate.value
     ) {
       endDate.value =
         startDate.value;
@@ -1053,11 +1104,8 @@
         "Continue to payment";
     }
 
-    /*
-     * Initially show only workspace units that are
-     * available.
-     */
-    availableOnly.checked = true;
+    availableOnly.checked =
+      true;
 
     filtersForm.addEventListener(
       "change",
@@ -1123,10 +1171,6 @@
       shareWorkspaceStories
     );
 
-    /*
-     * auth.js sends this event whenever the user
-     * logs in or logs out.
-     */
     window.addEventListener(
       "syncspace:auth-changed",
       async (event) => {
@@ -1137,13 +1181,10 @@
     );
 
     await prefillFromUser();
+
     await loadWorkspaceAvailability();
   }
 
-  /**
-   * Starts the booking page and displays a meaningful
-   * error when the database is not configured yet.
-   */
   async function start() {
     try {
       await initializeBookingPage();
@@ -1172,12 +1213,15 @@
   }
 
   if (
-    document.readyState === "loading"
+    document.readyState ===
+    "loading"
   ) {
     document.addEventListener(
       "DOMContentLoaded",
       start,
-      { once: true }
+      {
+        once: true
+      }
     );
   } else {
     void start();
