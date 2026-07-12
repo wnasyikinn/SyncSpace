@@ -1029,4 +1029,38 @@ select {
     white-space: nowrap;
     border: 0;
   }
+
+  .profile-info {
+    min-width: 0;
+  }
+
+  .profile-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .bookings-card {
+    padding: clamp(18px, 2.5vw, 26px);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+
+  .bookings-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .bookings-header h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+  }
+
+  .bookings-list {
+    display: grid;
+    gap: 12px;
+  }
 }
