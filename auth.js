@@ -1,186 +1,458 @@
-const AUTH_KEY = "syncspace_user";
-const BOOKINGS_KEY = "syncspace_bookings";
+function getSupabaseClient() {
+  if (!window.supabaseClient) {
+    throw new Error("Supabase client has not been initialized.");
+  }
 
-function getUser() {
-  try {
-    return JSON.parse(localStorage.getItem(AUTH_KEY));
-  } catch {
+  return window.supabaseClient;
+}
+
+function getDisplayName(user) {
+  return (
+    user?.user_metadata?.full_name?.trim() ||
+    user?.email?.split("@")[0] ||
+    "User"
+  );
+}
+
+async function getUser() {
+  const {
+    data: { session },
+    error
+  } = await getSupabaseClient().auth.getSession();
+
+  if (error) {
+    console.error("Unable to retrieve session:", error.message);
     return null;
   }
+
+  return session?.user ?? null;
 }
 
-function setUser(user) {
-  localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-}
+async function logoutUser() {
+  const { error } = await getSupabaseClient().auth.signOut();
 
-function logoutUser() {
-  localStorage.removeItem(AUTH_KEY);
-}
-
-function getBookings() {
-  try {
-    return JSON.parse(localStorage.getItem(BOOKINGS_KEY)) || [];
-  } catch {
-    return [];
+  if (error) {
+    throw error;
   }
 }
 
-function saveBooking(booking) {
-  const bookings = getBookings();
-  booking.id = Date.now().toString(36);
-  booking.createdAt = new Date().toISOString();
-  bookings.push(booking);
-  localStorage.setItem(BOOKINGS_KEY, JSON.stringify(bookings));
-  return booking;
+async function saveBooking(booking) {
+  const user = await getUser();
+
+  if (!user) {
+    throw new Error("You must be logged in to make a booking.");
+  }
+
+  const payload = {
+    user_id: user.id,
+    room_id: booking.roomId,
+    room_name: booking.roomName,
+    room_type: booking.roomType,
+    start_date: booking.startDate,
+    end_date: booking.endDate,
+    time_slot: booking.timeSlot,
+    total: booking.total,
+    status: "confirmed"
+  };
+
+  const { data, error } = await getSupabaseClient()
+    .from("bookings")
+    .insert(payload)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }
 
-function getUserBookings() {
-  const user = getUser();
-  if (!user) return [];
-  return getBookings().filter((b) => b.email === user.email);
+async function getUserBookings() {
+  const user = await getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  const { data, error } = await getSupabaseClient()
+    .from("bookings")
+    .select(`
+      id,
+      user_id,
+      room_id,
+      room_name,
+      room_type,
+      start_date,
+      end_date,
+      time_slot,
+      total,
+      status,
+      created_at
+    `)
+    .eq("user_id", user.id)
+    .order("start_date", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
 }
 
 function showAuthModal(onSuccess) {
-  if (document.querySelector(".auth-overlay")) return;
+  if (document.querySelector(".auth-overlay")) {
+    return;
+  }
 
   const overlay = document.createElement("div");
   overlay.className = "auth-overlay";
+
   overlay.innerHTML = `
-    <div class="auth-modal">
-      <button type="button" class="auth-close" aria-label="Close">&times;</button>
+    <div class="auth-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="authModalTitle">
+
+      <button
+        type="button"
+        class="auth-close"
+        aria-label="Close">
+        &times;
+      </button>
+
+      <h2 id="authModalTitle" class="sr-only">
+        SyncSpace authentication
+      </h2>
+
       <div class="auth-tabs">
-        <button type="button" class="auth-tab active" data-tab="login">Log in</button>
-        <button type="button" class="auth-tab" data-tab="signup">Sign up</button>
+        <button
+          type="button"
+          class="auth-tab active"
+          data-tab="login">
+          Log in
+        </button>
+
+        <button
+          type="button"
+          class="auth-tab"
+          data-tab="signup">
+          Sign up
+        </button>
       </div>
+
       <form class="auth-form" id="loginForm">
         <label>
           <span>Email</span>
-          <input type="email" id="authEmail" placeholder="you@example.com" required>
+          <input
+            type="email"
+            id="authEmail"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required>
         </label>
+
         <label>
           <span>Password</span>
-          <input type="password" id="authPassword" placeholder="Your password" required minlength="6">
+          <input
+            type="password"
+            id="authPassword"
+            placeholder="Your password"
+            autocomplete="current-password"
+            minlength="6"
+            required>
         </label>
-        <button class="button primary" type="submit">Log in</button>
-        <p class="auth-message" id="authMessage" role="status"></p>
+
+        <button class="button primary" type="submit">
+          Log in
+        </button>
+
+        <p
+          class="auth-message"
+          id="authMessage"
+          role="status">
+        </p>
       </form>
-      <form class="auth-form" id="signupForm" style="display:none">
+
+      <form
+        class="auth-form"
+        id="signupForm"
+        style="display:none">
+
         <label>
           <span>Full name</span>
-          <input type="text" id="signupName" placeholder="Your name" required>
+          <input
+            type="text"
+            id="signupName"
+            placeholder="Your name"
+            autocomplete="name"
+            required>
         </label>
+
         <label>
           <span>Email</span>
-          <input type="email" id="signupEmail" placeholder="you@example.com" required>
+          <input
+            type="email"
+            id="signupEmail"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required>
         </label>
+
         <label>
           <span>Password</span>
-          <input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6">
+          <input
+            type="password"
+            id="signupPassword"
+            placeholder="Minimum 6 characters"
+            autocomplete="new-password"
+            minlength="6"
+            required>
         </label>
-        <button class="button primary" type="submit">Create account</button>
-        <p class="auth-message" id="signupMessage" role="status"></p>
+
+        <button class="button primary" type="submit">
+          Create account
+        </button>
+
+        <p
+          class="auth-message"
+          id="signupMessage"
+          role="status">
+        </p>
       </form>
     </div>
   `;
 
   document.body.appendChild(overlay);
 
-  overlay.querySelector(".auth-close").addEventListener("click", () => overlay.remove());
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) overlay.remove();
+  const closeModal = () => {
+    overlay.remove();
+    document.body.style.overflow = "";
+  };
+
+  document.body.style.overflow = "hidden";
+
+  overlay
+    .querySelector(".auth-close")
+    .addEventListener("click", closeModal);
+
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      closeModal();
+    }
   });
+
+  document.addEventListener(
+    "keydown",
+    function escapeHandler(event) {
+      if (event.key === "Escape") {
+        closeModal();
+        document.removeEventListener("keydown", escapeHandler);
+      }
+    }
+  );
+
+  const loginForm = overlay.querySelector("#loginForm");
+  const signupForm = overlay.querySelector("#signupForm");
 
   overlay.querySelectorAll(".auth-tab").forEach((tab) => {
     tab.addEventListener("click", () => {
-      overlay.querySelectorAll(".auth-tab").forEach((t) => t.classList.remove("active"));
+      overlay
+        .querySelectorAll(".auth-tab")
+        .forEach((item) => item.classList.remove("active"));
+
       tab.classList.add("active");
-      const isLogin = tab.dataset.tab === "login";
-      overlay.querySelector("#loginForm").style.display = isLogin ? "" : "none";
-      overlay.querySelector("#signupForm").style.display = isLogin ? "none" : "";
+
+      const showingLogin = tab.dataset.tab === "login";
+
+      loginForm.style.display = showingLogin ? "" : "none";
+      signupForm.style.display = showingLogin ? "none" : "";
     });
   });
 
-  const USERS_KEY = "syncspace_users";
-  function getUsers() {
-    try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }
-    catch { return []; }
-  }
+  signupForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-  overlay.querySelector("#signupForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const name = overlay.querySelector("#signupName").value.trim();
-    const email = overlay.querySelector("#signupEmail").value.trim().toLowerCase();
-    const password = overlay.querySelector("#signupPassword").value;
-    const msg = overlay.querySelector("#signupMessage");
+    const name = overlay
+      .querySelector("#signupName")
+      .value
+      .trim();
 
-    const users = getUsers();
-    if (users.find((u) => u.email === email)) {
-      msg.textContent = "An account with this email already exists.";
+    const email = overlay
+      .querySelector("#signupEmail")
+      .value
+      .trim()
+      .toLowerCase();
+
+    const password = overlay
+      .querySelector("#signupPassword")
+      .value;
+
+    const message = overlay.querySelector("#signupMessage");
+    const submitButton = signupForm.querySelector(
+      'button[type="submit"]'
+    );
+
+    if (!name) {
+      message.textContent = "Enter your full name.";
       return;
     }
 
-    users.push({ name, email, password });
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    setUser({ name, email });
-    overlay.remove();
-    updateAuthUI();
-    if (onSuccess) onSuccess();
+    submitButton.disabled = true;
+    message.textContent = "Creating account...";
+
+    try {
+      const redirectUrl = new URL(
+        "index.html",
+        window.location.href
+      ).href;
+
+      const { data, error } =
+        await getSupabaseClient().auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name
+            },
+            emailRedirectTo: redirectUrl
+          }
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.session) {
+        message.textContent =
+          "Account created. Check your email to confirm your account, then log in.";
+        return;
+      }
+
+      closeModal();
+      await updateAuthUI(data.user);
+
+      if (typeof onSuccess === "function") {
+        await onSuccess();
+      }
+    } catch (error) {
+      message.textContent =
+        error.message || "The account could not be created.";
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 
-  overlay.querySelector("#loginForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = overlay.querySelector("#authEmail").value.trim().toLowerCase();
-    const password = overlay.querySelector("#authPassword").value;
-    const msg = overlay.querySelector("#authMessage");
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-    const users = getUsers();
-    const found = users.find((u) => u.email === email && u.password === password);
-    if (!found) {
-      msg.textContent = "Invalid email or password.";
-      return;
+    const email = overlay
+      .querySelector("#authEmail")
+      .value
+      .trim()
+      .toLowerCase();
+
+    const password = overlay
+      .querySelector("#authPassword")
+      .value;
+
+    const message = overlay.querySelector("#authMessage");
+    const submitButton = loginForm.querySelector(
+      'button[type="submit"]'
+    );
+
+    submitButton.disabled = true;
+    message.textContent = "Logging in...";
+
+    try {
+      const { data, error } =
+        await getSupabaseClient().auth.signInWithPassword({
+          email,
+          password
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      closeModal();
+      await updateAuthUI(data.user);
+
+      if (typeof onSuccess === "function") {
+        await onSuccess();
+      }
+    } catch (error) {
+      message.textContent =
+        error.message || "Invalid email or password.";
+    } finally {
+      submitButton.disabled = false;
     }
-
-    setUser({ name: found.name, email: found.email });
-    overlay.remove();
-    updateAuthUI();
-    if (onSuccess) onSuccess();
   });
 }
 
-function updateAuthUI() {
-  const user = getUser();
+async function updateAuthUI(providedUser) {
+  const user =
+    providedUser === undefined
+      ? await getUser()
+      : providedUser;
+
   const profileLink = document.querySelector("#navProfile");
-  const logoutBtn = document.querySelector("#navLogout");
-  const loginBtn = document.querySelector("#navLogin");
+  const logoutButton = document.querySelector("#navLogout");
+  const loginButton = document.querySelector("#navLogin");
 
   if (profileLink) {
     profileLink.style.display = user ? "" : "none";
-    if (user) profileLink.textContent = user.name.split(" ")[0];
+
+    if (user) {
+      profileLink.textContent =
+        getDisplayName(user).split(/\s+/)[0];
+    }
   }
-  if (logoutBtn) {
-    logoutBtn.style.display = user ? "" : "none";
+
+  if (logoutButton) {
+    logoutButton.style.display = user ? "" : "none";
   }
-  if (loginBtn) {
-    loginBtn.style.display = user ? "none" : "";
+
+  if (loginButton) {
+    loginButton.style.display = user ? "none" : "";
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  updateAuthUI();
+document.addEventListener("DOMContentLoaded", async () => {
+  await updateAuthUI();
 
-  const logoutBtn = document.querySelector("#navLogout");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      logoutUser();
-      updateAuthUI();
-      if (window.location.pathname.includes("profile")) {
-        window.location.href = "index.html";
+  const logoutButton = document.querySelector("#navLogout");
+
+  if (logoutButton) {
+    logoutButton.addEventListener("click", async () => {
+      try {
+        await logoutUser();
+        await updateAuthUI(null);
+
+        if (
+          window.location.pathname
+            .toLowerCase()
+            .includes("profile")
+        ) {
+          window.location.href = "index.html";
+        }
+      } catch (error) {
+        console.error("Logout failed:", error.message);
       }
     });
   }
 
-  const loginBtn = document.querySelector("#navLogin");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => showAuthModal());
+  const loginButton = document.querySelector("#navLogin");
+
+  if (loginButton) {
+    loginButton.addEventListener("click", () => {
+      showAuthModal();
+    });
   }
+
+  getSupabaseClient().auth.onAuthStateChange(
+    (_event, session) => {
+      updateAuthUI(session?.user ?? null);
+    }
+  );
 });
