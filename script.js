@@ -1,3 +1,4 @@
+script.js:
 const rooms = [
   {
     id: "focus-desk",
@@ -242,38 +243,74 @@ async function prefillFromUser() {
   emailInput.value = user.email ?? "";
 }
 
-bookingForm.addEventListener("submit", (event) => {
+bookingForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (!selectedRoom) {
-    formMessage.textContent = "Select a room before submitting your request.";
+    formMessage.textContent =
+      "Select a room before submitting your request.";
     return;
   }
 
-  const user = getUser();
+  const user = await getUser();
+
   if (!user) {
-    showAuthModal(() => {
-      prefillFromUser();
-      formMessage.textContent = "You are now logged in. Click Confirm booking again.";
+    showAuthModal(async () => {
+      await prefillFromUser();
+
+      formMessage.textContent =
+        "You are now logged in. Click Confirm booking again.";
     });
+
     return;
   }
 
-  const booking = {
-    room: selectedRoom.name,
-    roomType: selectedRoom.type,
-    startDate: startDate.value,
-    endDate: endDate.value,
-    date: formatDateRange(),
-    time: timeSlot.value,
-    total: formatPrice(selectedRoom.price * getBookingDays()),
-    name: user.name,
-    email: user.email
-  };
+  const submitButton = bookingForm.querySelector(
+    'button[type="submit"]'
+  );
 
-  saveBooking(booking);
-  formMessage.textContent = `Booking confirmed for ${booking.room}. Total: ${booking.total}.`;
-  bookingForm.reset();
+  submitButton.disabled = true;
+  formMessage.textContent = "Confirming your booking...";
+
+  try {
+    const totalValue =
+      selectedRoom.price * getBookingDays();
+
+    const savedBooking = await saveBooking({
+      roomId: selectedRoom.id,
+      roomName: selectedRoom.name,
+      roomType: selectedRoom.type,
+      startDate: startDate.value,
+      endDate: endDate.value,
+      timeSlot: timeSlot.value,
+      total: totalValue
+    });
+
+    const reference = savedBooking.id
+      .split("-")[0]
+      .toUpperCase();
+
+    formMessage.textContent =
+      `Booking confirmed for ${savedBooking.room_name}. ` +
+      `Reference: ${reference}.`;
+
+    selectedRoom = null;
+
+    selectedRoomName.textContent =
+      "Choose a room to continue";
+
+    updateSummary();
+    renderRooms();
+    await prefillFromUser();
+  } catch (error) {
+    console.error("Booking failed:", error);
+
+    formMessage.textContent =
+      error.message ||
+      "The booking could not be confirmed.";
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 
 document.querySelector("#shareStories").addEventListener("click", () => {
