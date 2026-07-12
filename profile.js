@@ -396,6 +396,8 @@
           return (
             reservation.booking_status ===
               "confirmed" &&
+            reservation.payment_status ===
+              "paid" &&
             new Date(
               reservation.ends_at
             ).getTime() >= now
@@ -647,6 +649,10 @@
   function upcomingReservationCard(
     reservation
   ) {
+    const hasPaidPayment =
+      reservation.payment_status ===
+      "paid";
+    
     const openRefundStatuses = [
       "requested",
       "approved",
@@ -677,6 +683,16 @@
           disabled
         >
           Cancellation request submitted
+        </button>
+      `;
+    } else if (!hasPaidPayment) {
+      action = `
+        <button
+          type="button"
+          class="button secondary"
+          disabled
+        >
+          Cancellation unavailable — payment not completed
         </button>
       `;
     } else if (hasStarted) {
