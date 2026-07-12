@@ -1,6 +1,5 @@
 console.log("SyncSpace booking script loaded");
 
-script.js:
 const rooms = [
   {
     id: "focus-desk",
