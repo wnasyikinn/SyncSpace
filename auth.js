@@ -1,458 +1,853 @@
-function getSupabaseClient() {
-  if (!window.supabaseClient) {
-    throw new Error("Supabase client has not been initialized.");
-  }
+(() => {
+  "use strict";
 
-  return window.supabaseClient;
-}
+  const DEFAULT_ROLE = "customer";
+  const ADMIN_ROLE = "admin";
 
-function getDisplayName(user) {
-  return (
-    user?.user_metadata?.full_name?.trim() ||
-    user?.email?.split("@")[0] ||
-    "User"
-  );
-}
-
-async function getUser() {
-  const {
-    data: { session },
-    error
-  } = await getSupabaseClient().auth.getSession();
-
-  if (error) {
-    console.error("Unable to retrieve session:", error.message);
-    return null;
-  }
-
-  return session?.user ?? null;
-}
-
-async function logoutUser() {
-  const { error } = await getSupabaseClient().auth.signOut();
-
-  if (error) {
-    throw error;
-  }
-}
-
-async function saveBooking(booking) {
-  const user = await getUser();
-
-  if (!user) {
-    throw new Error("You must be logged in to make a booking.");
-  }
-
-  const payload = {
-    user_id: user.id,
-    room_id: booking.roomId,
-    room_name: booking.roomName,
-    room_type: booking.roomType,
-    start_date: booking.startDate,
-    end_date: booking.endDate,
-    time_slot: booking.timeSlot,
-    total: booking.total,
-    status: "confirmed"
-  };
-
-  const { data, error } = await getSupabaseClient()
-    .from("bookings")
-    .insert(payload)
-    .select()
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-async function getUserBookings() {
-  const user = await getUser();
-
-  if (!user) {
-    return [];
-  }
-
-  const { data, error } = await getSupabaseClient()
-    .from("bookings")
-    .select(`
-      id,
-      user_id,
-      room_id,
-      room_name,
-      room_type,
-      start_date,
-      end_date,
-      time_slot,
-      total,
-      status,
-      created_at
-    `)
-    .eq("user_id", user.id)
-    .order("start_date", { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return data ?? [];
-}
-
-function showAuthModal(onSuccess) {
-  if (document.querySelector(".auth-overlay")) {
-    return;
-  }
-
-  const overlay = document.createElement("div");
-  overlay.className = "auth-overlay";
-
-  overlay.innerHTML = `
-    <div class="auth-modal"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="authModalTitle">
-
-      <button
-        type="button"
-        class="auth-close"
-        aria-label="Close">
-        &times;
-      </button>
-
-      <h2 id="authModalTitle" class="sr-only">
-        SyncSpace authentication
-      </h2>
-
-      <div class="auth-tabs">
-        <button
-          type="button"
-          class="auth-tab active"
-          data-tab="login">
-          Log in
-        </button>
-
-        <button
-          type="button"
-          class="auth-tab"
-          data-tab="signup">
-          Sign up
-        </button>
-      </div>
-
-      <form class="auth-form" id="loginForm">
-        <label>
-          <span>Email</span>
-          <input
-            type="email"
-            id="authEmail"
-            placeholder="you@example.com"
-            autocomplete="email"
-            required>
-        </label>
-
-        <label>
-          <span>Password</span>
-          <input
-            type="password"
-            id="authPassword"
-            placeholder="Your password"
-            autocomplete="current-password"
-            minlength="6"
-            required>
-        </label>
-
-        <button class="button primary" type="submit">
-          Log in
-        </button>
-
-        <p
-          class="auth-message"
-          id="authMessage"
-          role="status">
-        </p>
-      </form>
-
-      <form
-        class="auth-form"
-        id="signupForm"
-        style="display:none">
-
-        <label>
-          <span>Full name</span>
-          <input
-            type="text"
-            id="signupName"
-            placeholder="Your name"
-            autocomplete="name"
-            required>
-        </label>
-
-        <label>
-          <span>Email</span>
-          <input
-            type="email"
-            id="signupEmail"
-            placeholder="you@example.com"
-            autocomplete="email"
-            required>
-        </label>
-
-        <label>
-          <span>Password</span>
-          <input
-            type="password"
-            id="signupPassword"
-            placeholder="Minimum 6 characters"
-            autocomplete="new-password"
-            minlength="6"
-            required>
-        </label>
-
-        <button class="button primary" type="submit">
-          Create account
-        </button>
-
-        <p
-          class="auth-message"
-          id="signupMessage"
-          role="status">
-        </p>
-      </form>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  const closeModal = () => {
-    overlay.remove();
-    document.body.style.overflow = "";
-  };
-
-  document.body.style.overflow = "hidden";
-
-  overlay
-    .querySelector(".auth-close")
-    .addEventListener("click", closeModal);
-
-  overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) {
-      closeModal();
+  /**
+   * Returns the initialized Supabase browser client.
+   */
+  function getSupabaseClient() {
+    if (!window.supabaseClient) {
+      throw new Error(
+        "Supabase client has not been initialized. " +
+        "Load supabase-client.js before auth.js."
+      );
     }
-  });
 
-  document.addEventListener(
-    "keydown",
-    function escapeHandler(event) {
-      if (event.key === "Escape") {
-        closeModal();
-        document.removeEventListener("keydown", escapeHandler);
-      }
+    return window.supabaseClient;
+  }
+
+  /**
+   * Retrieves and validates the currently authenticated user.
+   */
+  async function getUser() {
+    const {
+      data: { user },
+      error
+    } = await getSupabaseClient().auth.getUser();
+
+    if (error) {
+      console.error(
+        "Unable to retrieve authenticated user:",
+        error.message
+      );
+
+      return null;
     }
-  );
 
-  const loginForm = overlay.querySelector("#loginForm");
-  const signupForm = overlay.querySelector("#signupForm");
+    return user ?? null;
+  }
 
-  overlay.querySelectorAll(".auth-tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      overlay
-        .querySelectorAll(".auth-tab")
-        .forEach((item) => item.classList.remove("active"));
+  /**
+   * Creates a fallback profile from Supabase Auth metadata.
+   *
+   * This is used until the public.profiles table is created,
+   * or when a matching profile record does not yet exist.
+   */
+  function createFallbackProfile(user) {
+    if (!user) {
+      return null;
+    }
 
-      tab.classList.add("active");
+    return {
+      id: user.id,
+      full_name:
+        user.user_metadata?.full_name?.trim() ||
+        user.email?.split("@")[0] ||
+        "User",
+      phone:
+        user.phone ||
+        user.user_metadata?.phone ||
+        "",
+      role: DEFAULT_ROLE,
+      created_at: user.created_at ?? null,
+      updated_at: null
+    };
+  }
 
-      const showingLogin = tab.dataset.tab === "login";
+  /**
+   * Retrieves the user's SyncSpace profile.
+   *
+   * Expected future table:
+   * public.profiles
+   *
+   * Expected minimum fields:
+   * id, full_name, phone, role, created_at, updated_at
+   */
+  async function getUserProfile(providedUser) {
+    const user =
+      providedUser === undefined
+        ? await getUser()
+        : providedUser;
 
-      loginForm.style.display = showingLogin ? "" : "none";
-      signupForm.style.display = showingLogin ? "none" : "";
-    });
-  });
+    if (!user) {
+      return null;
+    }
 
-  signupForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
+    const fallbackProfile = createFallbackProfile(user);
 
-    const name = overlay
-      .querySelector("#signupName")
-      .value
-      .trim();
+    const { data, error } = await getSupabaseClient()
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
 
-    const email = overlay
-      .querySelector("#signupEmail")
-      .value
-      .trim()
-      .toLowerCase();
+    if (error) {
+      console.warn(
+        "Profile record could not be retrieved. " +
+        "Using authentication metadata temporarily:",
+        error.message
+      );
 
-    const password = overlay
-      .querySelector("#signupPassword")
-      .value;
+      return fallbackProfile;
+    }
 
-    const message = overlay.querySelector("#signupMessage");
-    const submitButton = signupForm.querySelector(
-      'button[type="submit"]'
+    if (!data) {
+      return fallbackProfile;
+    }
+
+    return {
+      ...fallbackProfile,
+      ...data,
+      role:
+        data.role === ADMIN_ROLE
+          ? ADMIN_ROLE
+          : DEFAULT_ROLE
+    };
+  }
+
+  /**
+   * Returns the user's preferred display name.
+   */
+  function getDisplayName(user, profile = null) {
+    return (
+      profile?.full_name?.trim() ||
+      user?.user_metadata?.full_name?.trim() ||
+      user?.email?.split("@")[0] ||
+      "User"
     );
+  }
 
-    if (!name) {
-      message.textContent = "Enter your full name.";
+  /**
+   * Returns either "admin" or "customer".
+   */
+  async function getUserRole(providedUser) {
+    const user =
+      providedUser === undefined
+        ? await getUser()
+        : providedUser;
+
+    if (!user) {
+      return null;
+    }
+
+    const profile = await getUserProfile(user);
+
+    return profile?.role === ADMIN_ROLE
+      ? ADMIN_ROLE
+      : DEFAULT_ROLE;
+  }
+
+  /**
+   * Checks whether the currently authenticated user is an admin.
+   *
+   * This controls the interface only. Supabase RLS must still
+   * protect administrative database operations.
+   */
+  async function isAdmin(providedUser) {
+    const role = await getUserRole(providedUser);
+    return role === ADMIN_ROLE;
+  }
+
+  /**
+   * Use on pages that require an authenticated customer.
+   */
+  async function requireAuthenticatedUser(
+    redirectTo = "index.html"
+  ) {
+    const user = await getUser();
+
+    if (!user) {
+      window.location.href = redirectTo;
+      return null;
+    }
+
+    return user;
+  }
+
+  /**
+   * Use on the future admin page.
+   */
+  async function requireAdmin(
+    redirectTo = "index.html"
+  ) {
+    const user = await getUser();
+
+    if (!user) {
+      window.location.href = redirectTo;
+      return null;
+    }
+
+    const profile = await getUserProfile(user);
+
+    if (profile?.role !== ADMIN_ROLE) {
+      window.location.href = redirectTo;
+      return null;
+    }
+
+    return {
+      user,
+      profile
+    };
+  }
+
+  /**
+   * Logs the current user out.
+   */
+  async function logoutUser() {
+    const { error } =
+      await getSupabaseClient().auth.signOut();
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Returns the page used after confirming a signup email.
+   */
+  function getEmailConfirmationRedirect() {
+    return new URL(
+      "index.html",
+      window.location.href
+    ).href;
+  }
+
+  /**
+   * Displays the shared login and signup modal.
+   */
+  function showAuthModal(
+    onSuccess = null,
+    initialTab = "login"
+  ) {
+    if (document.querySelector(".auth-overlay")) {
       return;
     }
 
-    submitButton.disabled = true;
-    message.textContent = "Creating account...";
+    const overlay = document.createElement("div");
+    overlay.className = "auth-overlay";
 
-    try {
-      const redirectUrl = new URL(
-        "index.html",
-        window.location.href
-      ).href;
+    overlay.innerHTML = `
+      <div
+        class="auth-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="authModalTitle"
+      >
+        <button
+          type="button"
+          class="auth-close"
+          aria-label="Close authentication window"
+        >
+          &times;
+        </button>
 
-      const { data, error } =
-        await getSupabaseClient().auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: name
-            },
-            emailRedirectTo: redirectUrl
-          }
+        <h2
+          id="authModalTitle"
+          class="sr-only"
+        >
+          SyncSpace authentication
+        </h2>
+
+        <div class="auth-tabs">
+          <button
+            type="button"
+            class="auth-tab"
+            data-tab="login"
+          >
+            Log in
+          </button>
+
+          <button
+            type="button"
+            class="auth-tab"
+            data-tab="signup"
+          >
+            Sign up
+          </button>
+        </div>
+
+        <form
+          class="auth-form"
+          id="loginForm"
+          novalidate
+        >
+          <label>
+            <span>Email</span>
+
+            <input
+              type="email"
+              id="authEmail"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            >
+          </label>
+
+          <label>
+            <span>Password</span>
+
+            <input
+              type="password"
+              id="authPassword"
+              placeholder="Your password"
+              autocomplete="current-password"
+              minlength="6"
+              required
+            >
+          </label>
+
+          <button
+            class="button primary"
+            type="submit"
+          >
+            Log in
+          </button>
+
+          <p
+            class="auth-message"
+            id="authMessage"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+
+        <form
+          class="auth-form"
+          id="signupForm"
+          novalidate
+        >
+          <label>
+            <span>Full name</span>
+
+            <input
+              type="text"
+              id="signupName"
+              placeholder="Your full name"
+              autocomplete="name"
+              minlength="2"
+              required
+            >
+          </label>
+
+          <label>
+            <span>Email</span>
+
+            <input
+              type="email"
+              id="signupEmail"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            >
+          </label>
+
+          <label>
+            <span>Password</span>
+
+            <input
+              type="password"
+              id="signupPassword"
+              placeholder="Minimum 6 characters"
+              autocomplete="new-password"
+              minlength="6"
+              required
+            >
+          </label>
+
+          <button
+            class="button primary"
+            type="submit"
+          >
+            Create account
+          </button>
+
+          <p
+            class="auth-message"
+            id="signupMessage"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const loginForm =
+      overlay.querySelector("#loginForm");
+
+    const signupForm =
+      overlay.querySelector("#signupForm");
+
+    const loginMessage =
+      overlay.querySelector("#authMessage");
+
+    const signupMessage =
+      overlay.querySelector("#signupMessage");
+
+    const previousBodyOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    function setActiveTab(tabName) {
+      const showingLogin = tabName === "login";
+
+      loginForm.style.display =
+        showingLogin ? "" : "none";
+
+      signupForm.style.display =
+        showingLogin ? "none" : "";
+
+      overlay
+        .querySelectorAll(".auth-tab")
+        .forEach((tab) => {
+          tab.classList.toggle(
+            "active",
+            tab.dataset.tab === tabName
+          );
         });
 
-      if (error) {
-        throw error;
-      }
+      loginMessage.textContent = "";
+      signupMessage.textContent = "";
 
-      if (!data.session) {
-        message.textContent =
-          "Account created. Check your email to confirm your account, then log in.";
-        return;
-      }
+      const fieldToFocus = showingLogin
+        ? overlay.querySelector("#authEmail")
+        : overlay.querySelector("#signupName");
 
-      closeModal();
-      await updateAuthUI(data.user);
-
-      if (typeof onSuccess === "function") {
-        await onSuccess();
-      }
-    } catch (error) {
-      message.textContent =
-        error.message || "The account could not be created.";
-    } finally {
-      submitButton.disabled = false;
+      window.setTimeout(() => {
+        fieldToFocus?.focus();
+      }, 0);
     }
-  });
 
-  loginForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
+    function closeModal() {
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
 
-    const email = overlay
-      .querySelector("#authEmail")
-      .value
-      .trim()
-      .toLowerCase();
+      document.body.style.overflow =
+        previousBodyOverflow;
 
-    const password = overlay
-      .querySelector("#authPassword")
-      .value;
+      overlay.remove();
+    }
 
-    const message = overlay.querySelector("#authMessage");
-    const submitButton = loginForm.querySelector(
-      'button[type="submit"]'
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    }
+
+    document.addEventListener(
+      "keydown",
+      handleEscape
     );
 
-    submitButton.disabled = true;
-    message.textContent = "Logging in...";
+    overlay
+      .querySelector(".auth-close")
+      .addEventListener("click", closeModal);
 
-    try {
-      const { data, error } =
-        await getSupabaseClient().auth.signInWithPassword({
-          email,
-          password
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        closeModal();
+      }
+    });
+
+    overlay
+      .querySelectorAll(".auth-tab")
+      .forEach((tab) => {
+        tab.addEventListener("click", () => {
+          setActiveTab(tab.dataset.tab);
         });
+      });
 
-      if (error) {
-        throw error;
-      }
+    signupForm.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
 
-      closeModal();
-      await updateAuthUI(data.user);
+        const fullName = overlay
+          .querySelector("#signupName")
+          .value
+          .trim();
 
-      if (typeof onSuccess === "function") {
-        await onSuccess();
-      }
-    } catch (error) {
-      message.textContent =
-        error.message || "Invalid email or password.";
-    } finally {
-      submitButton.disabled = false;
-    }
-  });
-}
+        const email = overlay
+          .querySelector("#signupEmail")
+          .value
+          .trim()
+          .toLowerCase();
 
-async function updateAuthUI(providedUser) {
-  const user =
-    providedUser === undefined
-      ? await getUser()
-      : providedUser;
+        const password = overlay
+          .querySelector("#signupPassword")
+          .value;
 
-  const profileLink = document.querySelector("#navProfile");
-  const logoutButton = document.querySelector("#navLogout");
-  const loginButton = document.querySelector("#navLogin");
+        const submitButton =
+          signupForm.querySelector(
+            'button[type="submit"]'
+          );
 
-  if (profileLink) {
-    profileLink.style.display = user ? "" : "none";
+        if (fullName.length < 2) {
+          signupMessage.textContent =
+            "Enter your full name.";
 
-    if (user) {
-      profileLink.textContent =
-        getDisplayName(user).split(/\s+/)[0];
-    }
-  }
-
-  if (logoutButton) {
-    logoutButton.style.display = user ? "" : "none";
-  }
-
-  if (loginButton) {
-    loginButton.style.display = user ? "none" : "";
-  }
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  await updateAuthUI();
-
-  const logoutButton = document.querySelector("#navLogout");
-
-  if (logoutButton) {
-    logoutButton.addEventListener("click", async () => {
-      try {
-        await logoutUser();
-        await updateAuthUI(null);
-
-        if (
-          window.location.pathname
-            .toLowerCase()
-            .includes("profile")
-        ) {
-          window.location.href = "index.html";
+          return;
         }
-      } catch (error) {
-        console.error("Logout failed:", error.message);
+
+        if (!signupForm.checkValidity()) {
+          signupForm.reportValidity();
+          return;
+        }
+
+        submitButton.disabled = true;
+        signupMessage.textContent =
+          "Creating your account...";
+
+        try {
+          const { data, error } =
+            await getSupabaseClient().auth.signUp({
+              email,
+              password,
+              options: {
+                data: {
+                  full_name: fullName
+                },
+                emailRedirectTo:
+                  getEmailConfirmationRedirect()
+              }
+            });
+
+          if (error) {
+            throw error;
+          }
+
+          /*
+           * With email confirmation enabled,
+           * data.session is normally null until the
+           * confirmation link has been opened.
+           */
+          if (!data.session) {
+            signupMessage.textContent =
+              "Account created. Check your email and " +
+              "confirm your account before logging in.";
+
+            signupForm.reset();
+            return;
+          }
+
+          await updateAuthUI(data.user);
+          closeModal();
+
+          if (typeof onSuccess === "function") {
+            try {
+              await onSuccess(data.user);
+            } catch (callbackError) {
+              console.error(
+                "Post-login action failed:",
+                callbackError
+              );
+            }
+          }
+        } catch (error) {
+          signupMessage.textContent =
+            error.message ||
+            "The account could not be created.";
+        } finally {
+          submitButton.disabled = false;
+        }
       }
-    });
+    );
+
+    loginForm.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        if (!loginForm.checkValidity()) {
+          loginForm.reportValidity();
+          return;
+        }
+
+        const email = overlay
+          .querySelector("#authEmail")
+          .value
+          .trim()
+          .toLowerCase();
+
+        const password = overlay
+          .querySelector("#authPassword")
+          .value;
+
+        const submitButton =
+          loginForm.querySelector(
+            'button[type="submit"]'
+          );
+
+        submitButton.disabled = true;
+        loginMessage.textContent =
+          "Logging in...";
+
+        try {
+          const { data, error } =
+            await getSupabaseClient()
+              .auth
+              .signInWithPassword({
+                email,
+                password
+              });
+
+          if (error) {
+            throw error;
+          }
+
+          await updateAuthUI(data.user);
+          closeModal();
+
+          if (typeof onSuccess === "function") {
+            try {
+              await onSuccess(data.user);
+            } catch (callbackError) {
+              console.error(
+                "Post-login action failed:",
+                callbackError
+              );
+            }
+          }
+        } catch (error) {
+          loginMessage.textContent =
+            error.message ||
+            "Invalid email or password.";
+        } finally {
+          submitButton.disabled = false;
+        }
+      }
+    );
+
+    setActiveTab(
+      initialTab === "signup"
+        ? "signup"
+        : "login"
+    );
   }
 
-  const loginButton = document.querySelector("#navLogin");
+  /**
+   * Updates authentication-related navigation controls.
+   *
+   * Future pages may include:
+   * <a id="navAdmin" href="admin.html">Admin</a>
+   */
+  async function updateAuthUI(providedUser) {
+    const user =
+      providedUser === undefined
+        ? await getUser()
+        : providedUser;
 
-  if (loginButton) {
-    loginButton.addEventListener("click", () => {
-      showAuthModal();
-    });
-  }
+    const profile = user
+      ? await getUserProfile(user)
+      : null;
 
-  getSupabaseClient().auth.onAuthStateChange(
-    (_event, session) => {
-      updateAuthUI(session?.user ?? null);
+    const profileLink =
+      document.querySelector("#navProfile");
+
+    const adminLink =
+      document.querySelector("#navAdmin");
+
+    const logoutButton =
+      document.querySelector("#navLogout");
+
+    const loginButton =
+      document.querySelector("#navLogin");
+
+    if (profileLink) {
+      profileLink.style.display =
+        user ? "" : "none";
+
+      if (user) {
+        profileLink.textContent =
+          getDisplayName(user, profile)
+            .split(/\s+/)[0];
+      }
     }
-  );
-});
+
+    if (adminLink) {
+      adminLink.style.display =
+        user && profile?.role === ADMIN_ROLE
+          ? ""
+          : "none";
+    }
+
+    if (logoutButton) {
+      logoutButton.style.display =
+        user ? "" : "none";
+    }
+
+    if (loginButton) {
+      loginButton.style.display =
+        user ? "none" : "";
+    }
+
+    document.documentElement.dataset.authenticated =
+      user ? "true" : "false";
+
+    document.documentElement.dataset.userRole =
+      profile?.role ?? "guest";
+
+    /*
+     * Other scripts can listen for this event:
+     *
+     * window.addEventListener(
+     *   "syncspace:auth-changed",
+     *   event => console.log(event.detail)
+     * );
+     */
+    window.dispatchEvent(
+      new CustomEvent(
+        "syncspace:auth-changed",
+        {
+          detail: {
+            user,
+            profile
+          }
+        }
+      )
+    );
+
+    return {
+      user,
+      profile
+    };
+  }
+
+  /**
+   * Sets up shared navigation authentication controls.
+   */
+  async function initializeAuthentication() {
+    await updateAuthUI();
+
+    const logoutButton =
+      document.querySelector("#navLogout");
+
+    const loginButton =
+      document.querySelector("#navLogin");
+
+    if (logoutButton) {
+      logoutButton.addEventListener(
+        "click",
+        async () => {
+          logoutButton.disabled = true;
+
+          try {
+            await logoutUser();
+            await updateAuthUI(null);
+
+            const protectedPages = [
+              "profile.html",
+              "payment.html",
+              "admin.html"
+            ];
+
+            const currentPage =
+              window.location.pathname
+                .split("/")
+                .pop()
+                .toLowerCase();
+
+            if (protectedPages.includes(currentPage)) {
+              window.location.href = "index.html";
+            }
+          } catch (error) {
+            console.error(
+              "Logout failed:",
+              error.message
+            );
+
+            logoutButton.disabled = false;
+          }
+        }
+      );
+    }
+
+    if (loginButton) {
+      loginButton.addEventListener(
+        "click",
+        () => {
+          showAuthModal();
+        }
+      );
+    }
+
+    getSupabaseClient()
+      .auth
+      .onAuthStateChange(
+        (_event, session) => {
+          /*
+           * Run outside the auth callback so that
+           * profile queries do not block the callback.
+           */
+          window.setTimeout(() => {
+            void updateAuthUI(
+              session?.user ?? null
+            );
+          }, 0);
+        }
+      );
+  }
+
+  /*
+   * Make the shared functions available to
+   * booking.js, profile.js, payment.js, and admin.js.
+   */
+  window.getSupabaseClient =
+    getSupabaseClient;
+
+  window.getUser =
+    getUser;
+
+  window.getUserProfile =
+    getUserProfile;
+
+  window.getDisplayName =
+    getDisplayName;
+
+  window.getUserRole =
+    getUserRole;
+
+  window.isAdmin =
+    isAdmin;
+
+  window.requireAuthenticatedUser =
+    requireAuthenticatedUser;
+
+  window.requireAdmin =
+    requireAdmin;
+
+  window.logoutUser =
+    logoutUser;
+
+  window.showAuthModal =
+    showAuthModal;
+
+  window.updateAuthUI =
+    updateAuthUI;
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeAuthentication,
+      { once: true }
+    );
+  } else {
+    void initializeAuthentication();
+  }
+})();
