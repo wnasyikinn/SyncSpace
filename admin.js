@@ -99,8 +99,17 @@
   const workspaceCapacity =
     document.querySelector("#workspaceCapacity");
 
-  const workspacePrice =
-    document.querySelector("#workspacePrice");
+  const workspaceMorningPrice =
+    document.querySelector("#workspaceMorningPrice");
+  
+  const workspaceAfternoonPrice =
+    document.querySelector("#workspaceAfternoonPrice");
+  
+  const workspaceEveningPrice =
+    document.querySelector("#workspaceEveningPrice");
+  
+  const workspaceFullDayPrice =
+    document.querySelector("#workspaceFullDayPrice");
 
   const workspaceImageUrl =
     document.querySelector("#workspaceImageUrl");
@@ -206,7 +215,10 @@
       workspaceDescription,
       workspaceLayout,
       workspaceCapacity,
-      workspacePrice,
+      workspaceMorningPrice,
+      workspaceAfternoonPrice,
+      workspaceEveningPrice,
+      workspaceFullDayPrice,
       workspaceImageUrl,
       workspaceDisplayOrder,
       workspaceActive,
@@ -357,45 +369,29 @@
 
   function bookingStatusLabel(status) {
     const labels = {
-      pending_payment:
-        "Pending payment",
-
-      confirmed:
-        "Confirmed",
-
-      completed:
-        "Completed",
-
-      cancel_requested:
-        "Cancellation requested",
-
-      cancelled:
-        "Cancelled",
-
-      expired:
-        "Expired"
+      pending_payment: "Pending payment",
+      confirmed: "Confirmed",
+      completed: "Completed",
+      cancelled: "Cancelled",
+      expired: "Expired"
     };
+  
+    return labels[status] || "Unknown";
+  }
 
     return labels[status] || "Unknown";
   }
 
   function paymentStatusLabel(status) {
     const labels = {
-      pending:
-        "Pending",
-
-      paid:
-        "Paid",
-
-      failed:
-        "Failed",
-
-      refund_pending:
-        "Refund pending",
-
-      refunded:
-        "Refunded"
+      pending: "Pending",
+      paid: "Paid",
+      failed: "Failed",
+      refunded: "Refunded"
     };
+  
+    return labels[status] || "Unknown";
+  }
 
     return labels[status] || "Unknown";
   }
@@ -690,6 +686,10 @@
           layout,
           capacity,
           price,
+          morning_price,
+          afternoon_price,
+          evening_price,
+          full_day_price,
           image_url,
           active,
           display_order,
@@ -1012,15 +1012,50 @@
                       </div>
 
                       <div>
-                        <dt>Price</dt>
-
+                        <dt>09:00–12:00</dt>
+                      
                         <dd>
                           ${escapeHtml(
                             formatPrice(
-                              workspace.price
+                              workspace.morning_price
                             )
                           )}
-                          per day
+                        </dd>
+                      </div>
+                      
+                      <div>
+                        <dt>13:00–17:00</dt>
+                      
+                        <dd>
+                          ${escapeHtml(
+                            formatPrice(
+                              workspace.afternoon_price
+                            )
+                          )}
+                        </dd>
+                      </div>
+                      
+                      <div>
+                        <dt>18:00–21:00</dt>
+                      
+                        <dd>
+                          ${escapeHtml(
+                            formatPrice(
+                              workspace.evening_price
+                            )
+                          )}
+                        </dd>
+                      </div>
+                      
+                      <div>
+                        <dt>Full day</dt>
+                      
+                        <dd>
+                          ${escapeHtml(
+                            formatPrice(
+                              workspace.full_day_price
+                            )
+                          )}
                         </dd>
                       </div>
 
@@ -1877,8 +1912,17 @@
       workspaceCapacity.value =
         workspace.capacity;
 
-      workspacePrice.value =
-        workspace.price;
+      workspaceMorningPrice.value =
+        workspace.morning_price;
+      
+      workspaceAfternoonPrice.value =
+        workspace.afternoon_price;
+      
+      workspaceEveningPrice.value =
+        workspace.evening_price;
+      
+      workspaceFullDayPrice.value =
+        workspace.full_day_price;
 
       workspaceImageUrl.value =
         workspace.image_url || "";
@@ -1895,7 +1939,10 @@
       workspaceExistingId.value = "";
 
       workspaceCapacity.value = "1";
-      workspacePrice.value = "0";
+      workspaceMorningPrice.value = "0";
+      workspaceAfternoonPrice.value = "0";
+      workspaceEveningPrice.value = "0";
+      workspaceFullDayPrice.value = "0";
       workspaceDisplayOrder.value = "0";
       workspaceActive.checked = true;
     }
@@ -1938,18 +1985,31 @@
     );
   }
 
+  function readWorkspacePrice(
+    input,
+    label
+  ) {
+    const value = Number(input.value);
+  
+    if (
+      !Number.isFinite(value) ||
+      value < 0
+    ) {
+      throw new Error(
+        `${label} must be zero or higher.`
+      );
+    }
+  
+    return value;
+  }
+
   function getWorkspacePayload() {
     const capacity =
       Number(workspaceCapacity.value);
-
-    const price =
-      Number(workspacePrice.value);
-
+  
     const displayOrder =
-      Number(
-        workspaceDisplayOrder.value
-      );
-
+      Number(workspaceDisplayOrder.value);
+  
     if (
       !Number.isInteger(capacity) ||
       capacity < 1
@@ -1958,16 +2018,7 @@
         "Workspace capacity must be at least 1."
       );
     }
-
-    if (
-      !Number.isFinite(price) ||
-      price < 0
-    ) {
-      throw new Error(
-        "Workspace price cannot be negative."
-      );
-    }
-
+  
     if (
       !Number.isInteger(displayOrder) ||
       displayOrder < 0
@@ -1976,37 +2027,77 @@
         "Display order must be zero or higher."
       );
     }
-
+  
+    const morningPrice =
+      readWorkspacePrice(
+        workspaceMorningPrice,
+        "Morning price"
+      );
+  
+    const afternoonPrice =
+      readWorkspacePrice(
+        workspaceAfternoonPrice,
+        "Afternoon price"
+      );
+  
+    const eveningPrice =
+      readWorkspacePrice(
+        workspaceEveningPrice,
+        "Evening price"
+      );
+  
+    const fullDayPrice =
+      readWorkspacePrice(
+        workspaceFullDayPrice,
+        "Full-day price"
+      );
+  
     return {
       workspace_type_id:
         workspaceTypeId.value,
-
+  
       unit_code:
         workspaceUnitCode.value
           .trim()
           .toUpperCase(),
-
+  
       name:
         workspaceName.value.trim(),
-
+  
       description:
-        workspaceDescription.value
-          .trim(),
-
+        workspaceDescription.value.trim(),
+  
       layout:
         workspaceLayout.value.trim(),
-
+  
       capacity,
-
-      price,
-
+  
+      /*
+       * The legacy price column stores the full-day
+       * rate for backward compatibility.
+       */
+      price:
+        fullDayPrice,
+  
+      morning_price:
+        morningPrice,
+  
+      afternoon_price:
+        afternoonPrice,
+  
+      evening_price:
+        eveningPrice,
+  
+      full_day_price:
+        fullDayPrice,
+  
       image_url:
-        workspaceImageUrl.value
-          .trim() || null,
-
+        workspaceImageUrl.value.trim() ||
+        null,
+  
       active:
         workspaceActive.checked,
-
+  
       display_order:
         displayOrder
     };
@@ -2566,6 +2657,18 @@
       "keydown",
       handleEscapeKey
     );
+    
+    window.addEventListener(
+      "focus",
+      () => {
+        if (
+          workspaceModal.hidden &&
+          refundActionModal.hidden
+        ) {
+          void loadAdminData();
+        }
+      }
+    );    
   }
 
   async function initialiseAdminPage() {
