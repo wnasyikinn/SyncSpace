@@ -3131,3 +3131,153 @@ input[readonly] {
     flex-direction: column;
   }
 }
+
+/* --------------------------------------------------
+   Profile follower and following network
+-------------------------------------------------- */
+
+.profile-network-section {
+  display: grid;
+  gap: 22px;
+}
+
+.profile-network-stats {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.profile-network-stats article {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 18px;
+  background: var(--surface-soft);
+}
+
+.profile-network-stats article:first-child {
+  border-right: 1px solid var(--line);
+}
+
+.profile-network-stats strong {
+  color: var(--teal-dark);
+  font-size: 1.7rem;
+}
+
+.profile-network-stats span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.profile-network-columns {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.profile-network-columns > section {
+  min-width: 0;
+}
+
+.profile-network-columns h3 {
+  margin-bottom: 12px;
+}
+
+.profile-network-list {
+  display: grid;
+  gap: 9px;
+}
+
+.profile-network-member {
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.profile-network-member-link {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 11px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.profile-network-member-link:hover strong {
+  color: var(--teal);
+  text-decoration: underline;
+}
+
+.profile-network-member-link > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.profile-network-member-link strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-network-member-link small {
+  color: var(--muted);
+}
+
+.profile-network-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-network-avatar-initials {
+  color: white;
+  background: var(--teal);
+  font-weight: 900;
+}
+
+/* Clickable community comment authors */
+
+.community-comment-profile-link {
+  display: inline-flex;
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.community-comment-profile-link:focus-visible {
+  outline: 3px solid rgba(18, 106, 103, 0.3);
+  outline-offset: 3px;
+}
+
+.community-comment-name-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.community-comment-name-link:hover {
+  color: var(--teal);
+  text-decoration: underline;
+}
+
+@media (max-width: 650px) {
+  .profile-network-columns,
+  .profile-network-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-network-stats article:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+}
