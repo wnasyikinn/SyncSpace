@@ -131,7 +131,7 @@
         ></p>
 
         <section
-          class="profile-card"
+          class="profile-card expanded-profile-card"
           aria-labelledby="profileDisplayName"
         >
           <div
@@ -143,39 +143,175 @@
               SS
             </span>
           </div>
-
+        
           <div class="profile-info">
             <div class="profile-name-row">
               <div>
                 <p class="eyebrow">
-                  Customer profile
+                  Professional profile
                 </p>
-
+        
                 <h2 id="profileDisplayName">
                   Loading profile...
                 </h2>
-
+        
+                <p
+                  id="profileUsername"
+                  class="profile-username"
+                >
+                  @username
+                </p>
+        
                 <p
                   id="profileDisplayEmail"
                   class="profile-email"
                 ></p>
               </div>
-
-              <span
-                class="pill profile-role-badge"
-                id="profileRoleBadge"
-              >
-                Customer
-              </span>
+        
+              <div class="profile-header-actions">
+                <span
+                  class="pill profile-role-badge"
+                  id="profileRoleBadge"
+                >
+                  Customer
+                </span>
+        
+                <button
+                  type="button"
+                  class="button secondary"
+                  id="editProfileButton"
+                >
+                  Edit profile
+                </button>
+              </div>
             </div>
-
+        
+            <p
+              class="profile-biography"
+              id="profileBiography"
+            >
+              Add a short biography to introduce yourself to the
+              SyncSpace community.
+            </p>
+        
+            <dl class="profile-detail-grid">
+              <div>
+                <dt>Occupation</dt>
+        
+                <dd id="profileOccupation">
+                  Not provided
+                </dd>
+              </div>
+        
+              <div>
+                <dt>Organisation</dt>
+        
+                <dd id="profileOrganisation">
+                  Not provided
+                </dd>
+              </div>
+        
+              <div>
+                <dt>Preferred workspace</dt>
+        
+                <dd id="profilePreferredWorkspace">
+                  Not specified
+                </dd>
+              </div>
+        
+              <div>
+                <dt>Work style</dt>
+        
+                <dd id="profileWorkStyle">
+                  Not specified
+                </dd>
+              </div>
+        
+              <div>
+                <dt>Profile visibility</dt>
+        
+                <dd id="profileVisibility">
+                  Public
+                </dd>
+              </div>
+        
+              <div>
+                <dt>Phone</dt>
+        
+                <dd id="profilePhone">
+                  Not provided
+                </dd>
+              </div>
+            </dl>
+        
+            <div class="profile-tag-section">
+              <div>
+                <h3>
+                  Skills
+                </h3>
+        
+                <div
+                  class="profile-tag-list"
+                  id="profileSkills"
+                >
+                  <span class="profile-empty-value">
+                    No skills added
+                  </span>
+                </div>
+              </div>
+        
+              <div>
+                <h3>
+                  Interests
+                </h3>
+        
+                <div
+                  class="profile-tag-list"
+                  id="profileInterests"
+                >
+                  <span class="profile-empty-value">
+                    No interests added
+                  </span>
+                </div>
+              </div>
+            </div>
+        
+            <div
+              class="profile-link-list"
+              id="profileLinkList"
+              hidden
+            >
+              <a
+                id="profileLinkedInLink"
+                class="profile-external-link"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+              >
+                LinkedIn profile
+              </a>
+        
+              <a
+                id="profileWebsiteLink"
+                class="profile-external-link"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+              >
+                Personal website
+              </a>
+            </div>
+        
             <p class="profile-account-note">
-              Your account and reservation records are securely
-              associated with your authenticated SyncSpace account.
+              Your professional profile supports identity, networking,
+              workspace personalization, and future community interaction
+              within SyncSpace.
             </p>
           </div>
         </section>
-
+        
         <section
           class="reservation-overview"
           aria-labelledby="reservationOverviewTitle"
@@ -398,6 +534,289 @@
           </div>
         </section>
       </section>
+
+      <div
+        class="admin-modal-overlay"
+        id="profileEditModal"
+        hidden
+      >
+        <section
+          class="admin-modal profile-edit-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="profileEditTitle"
+        >
+          <button
+            type="button"
+            class="auth-close"
+            id="closeProfileEditModal"
+            aria-label="Close profile editor"
+          >
+            &times;
+          </button>
+      
+          <p class="eyebrow">
+            Digital identity
+          </p>
+      
+          <h2 id="profileEditTitle">
+            Edit Professional Profile
+          </h2>
+      
+          <p class="profile-edit-introduction">
+            Add information that helps other SyncSpace members understand
+            your professional role, skills, interests, and preferred way
+            of working.
+          </p>
+      
+          <form
+            class="admin-form profile-edit-form"
+            id="profileEditForm"
+          >
+            <div class="profile-form-grid">
+              <label>
+                <span>Full name</span>
+      
+                <input
+                  type="text"
+                  id="profileFullNameInput"
+                  minlength="2"
+                  maxlength="150"
+                  autocomplete="name"
+                  required
+                >
+              </label>
+      
+              <label>
+                <span>Username</span>
+      
+                <input
+                  type="text"
+                  id="profileUsernameInput"
+                  minlength="3"
+                  maxlength="30"
+                  pattern="[a-z0-9][a-z0-9_]{2,29}"
+                  placeholder="example_user"
+                  autocomplete="username"
+                  required
+                >
+      
+                <small>
+                  Use 3–30 lowercase letters, numbers, or underscores.
+                </small>
+              </label>
+      
+              <label>
+                <span>Phone number</span>
+      
+                <input
+                  type="tel"
+                  id="profilePhoneInput"
+                  maxlength="30"
+                  autocomplete="tel"
+                  placeholder="+60 12-345 6789"
+                >
+              </label>
+      
+              <label>
+                <span>Occupation or role</span>
+      
+                <input
+                  type="text"
+                  id="profileOccupationInput"
+                  maxlength="100"
+                  placeholder="Example: Software Developer"
+                >
+              </label>
+      
+              <label>
+                <span>Company or institution</span>
+      
+                <input
+                  type="text"
+                  id="profileOrganisationInput"
+                  maxlength="150"
+                  placeholder="Example: Universiti Teknologi MARA"
+                >
+              </label>
+      
+              <label>
+                <span>Preferred workspace type</span>
+      
+                <select id="profilePreferredWorkspaceInput">
+                  <option value="">
+                    No preference
+                  </option>
+                </select>
+              </label>
+      
+              <label>
+                <span>Work style</span>
+      
+                <select id="profileWorkStyleInput">
+                  <option value="">
+                    Not specified
+                  </option>
+      
+                  <option value="quiet_focus">
+                    Quiet and focused work
+                  </option>
+      
+                  <option value="collaboration">
+                    Team collaboration
+                  </option>
+      
+                  <option value="meetings">
+                    Meetings and presentations
+                  </option>
+      
+                  <option value="networking">
+                    Networking and community
+                  </option>
+      
+                  <option value="flexible">
+                    Flexible or mixed work style
+                  </option>
+                </select>
+              </label>
+      
+              <label>
+                <span>Profile visibility</span>
+      
+                <select
+                  id="profileVisibilityInput"
+                  required
+                >
+                  <option value="public">
+                    Public
+                  </option>
+      
+                  <option value="connections_only">
+                    Connections only
+                  </option>
+      
+                  <option value="private">
+                    Private
+                  </option>
+                </select>
+              </label>
+            </div>
+      
+            <label>
+              <span>Biography</span>
+      
+              <textarea
+                id="profileBioInput"
+                rows="5"
+                maxlength="500"
+                placeholder="Briefly introduce your professional background, goals, or current projects."
+              ></textarea>
+      
+              <small>
+                Maximum 500 characters.
+                <span id="profileBioCharacterCount">0</span>/500
+              </small>
+            </label>
+      
+            <div class="profile-form-grid">
+              <label>
+                <span>Skills</span>
+      
+                <input
+                  type="text"
+                  id="profileSkillsInput"
+                  maxlength="500"
+                  placeholder="Python, Web Development, Data Analysis"
+                >
+      
+                <small>
+                  Separate each skill with a comma.
+                </small>
+              </label>
+      
+              <label>
+                <span>Interests</span>
+      
+                <input
+                  type="text"
+                  id="profileInterestsInput"
+                  maxlength="500"
+                  placeholder="Entrepreneurship, AI, Remote Work"
+                >
+      
+                <small>
+                  Separate each interest with a comma.
+                </small>
+              </label>
+            </div>
+      
+            <label>
+              <span>Profile image URL</span>
+      
+              <input
+                type="url"
+                id="profileAvatarUrlInput"
+                maxlength="1000"
+                placeholder="https://example.com/profile-image.jpg"
+              >
+      
+              <small>
+                Stage 2 uses an image URL. Supabase Storage upload can be
+                added later when post and review image uploads are implemented.
+              </small>
+            </label>
+      
+            <div class="profile-form-grid">
+              <label>
+                <span>LinkedIn URL</span>
+      
+                <input
+                  type="url"
+                  id="profileLinkedInInput"
+                  maxlength="1000"
+                  placeholder="https://www.linkedin.com/in/username"
+                >
+              </label>
+      
+              <label>
+                <span>Website URL</span>
+      
+                <input
+                  type="url"
+                  id="profileWebsiteInput"
+                  maxlength="1000"
+                  placeholder="https://example.com"
+                >
+              </label>
+            </div>
+      
+            <div class="reservation-card-actions">
+              <button
+                type="button"
+                class="button secondary"
+                id="cancelProfileEditButton"
+              >
+                Cancel
+              </button>
+      
+              <button
+                type="submit"
+                class="button primary"
+                id="saveProfileButton"
+              >
+                Save profile
+              </button>
+            </div>
+      
+            <p
+              class="form-message"
+              id="profileEditMessage"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </form>
+        </section>
+      </div>
     </main>
 
     <footer class="site-footer">
@@ -416,5 +835,6 @@
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
     <script src="profile.js"></script>
+    <script src="profile-details.js"></script>
   </body>
 </html>
