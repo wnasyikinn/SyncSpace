@@ -60,7 +60,23 @@
         >
           Book a Space
         </a>
-
+        
+        <a
+          href="notifications.html"
+          data-notification-link
+          style="display: none"
+        >
+          Notifications
+        
+          <span
+            class="notification-nav-count"
+            data-notification-count
+            hidden
+          >
+            0
+          </span>
+        </a>
+        
         <a
           href="profile.html"
           id="navProfile"
@@ -877,5 +893,6 @@
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
     <script src="admin.js"></script>
+    <script src="notifications-nav.js?v=1"></script>
   </body>
 </html>
