@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    >
+
+    <title>Member Profile | SyncSpace</title>
+
+    <meta
+      name="description"
+      content="View a SyncSpace community member profile, professional interests, follower information, and recent community posts."
+    >
+
+    <link
+      rel="stylesheet"
+      href="styles.css"
+    >
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a
+        class="brand"
+        href="index.html"
+        aria-label="SyncSpace home"
+      >
+        <img
+          src="assets/syncspace-logo-mark.png"
+          alt="SyncSpace Coworking Space"
+        >
+      </a>
+
+      <nav
+        class="main-nav"
+        aria-label="Primary navigation"
+      >
+        <a href="index.html#about">
+          About
+        </a>
+
+        <a href="index.html#spaces">
+          Spaces
+        </a>
+
+        <a href="community.html">
+          Community
+        </a>
+
+        <a
+          class="nav-cta"
+          href="booking.html"
+        >
+          Book a Space
+        </a>
+
+        <a
+          href="profile.html"
+          id="navProfile"
+          class="nav-profile"
+          style="display: none"
+        >
+          Profile
+        </a>
+
+        <a
+          href="admin.html"
+          id="navAdmin"
+          class="nav-profile"
+          style="display: none"
+        >
+          Admin
+        </a>
+
+        <button
+          type="button"
+          id="navLogin"
+          class="nav-login"
+        >
+          Log in
+        </button>
+
+        <button
+          type="button"
+          id="navLogout"
+          class="nav-logout"
+          style="display: none"
+        >
+          Log out
+        </button>
+      </nav>
+    </header>
+
+    <main
+      class="public-profile-page"
+      id="publicProfilePage"
+      aria-busy="true"
+    >
+      <p
+        class="form-message"
+        id="publicProfileMessage"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+      <section
+        class="public-profile-card"
+        id="publicProfileCard"
+        hidden
+      >
+        <div class="public-profile-main">
+          <div
+            class="public-profile-avatar"
+            id="publicProfileAvatar"
+          >
+            SS
+          </div>
+
+          <div class="public-profile-identity">
+            <p class="eyebrow">
+              SyncSpace member
+            </p>
+
+            <h1 id="publicProfileName">
+              Member
+            </h1>
+
+            <p
+              class="public-profile-username"
+              id="publicProfileUsername"
+            ></p>
+
+            <p
+              class="public-profile-headline"
+              id="publicProfileHeadline"
+            ></p>
+
+            <p
+              class="public-profile-location"
+              id="publicProfileLocation"
+            ></p>
+          </div>
+
+          <button
+            type="button"
+            class="button primary public-follow-button"
+            id="followUserButton"
+            hidden
+          >
+            Follow
+          </button>
+        </div>
+
+        <div class="public-profile-stats">
+          <div>
+            <strong id="publicFollowerCount">
+              0
+            </strong>
+
+            <span>Followers</span>
+          </div>
+
+          <div>
+            <strong id="publicFollowingCount">
+              0
+            </strong>
+
+            <span>Following</span>
+          </div>
+
+          <div>
+            <strong id="publicPostCount">
+              0
+            </strong>
+
+            <span>Posts</span>
+          </div>
+        </div>
+
+        <div class="public-profile-details">
+          <section>
+            <h2>About</h2>
+
+            <p id="publicProfileBio">
+              This member has not added a biography.
+            </p>
+          </section>
+
+          <section
+            id="publicIndustrySection"
+            hidden
+          >
+            <h2>Industry</h2>
+
+            <p id="publicProfileIndustry"></p>
+          </section>
+
+          <section
+            id="publicSkillsSection"
+            hidden
+          >
+            <h2>Skills</h2>
+
+            <div
+              class="public-profile-tags"
+              id="publicProfileSkills"
+            ></div>
+          </section>
+
+          <section
+            id="publicInterestsSection"
+            hidden
+          >
+            <h2>Interests</h2>
+
+            <div
+              class="public-profile-tags"
+              id="publicProfileInterests"
+            ></div>
+          </section>
+
+          <section
+            id="publicLinksSection"
+            hidden
+          >
+            <h2>Links</h2>
+
+            <div class="public-profile-links">
+              <a
+                id="publicWebsiteLink"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+              >
+                Website
+              </a>
+
+              <a
+                id="publicLinkedinLink"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+              >
+                LinkedIn
+              </a>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section
+        class="bookings-card public-profile-posts"
+        id="publicProfilePostsSection"
+        hidden
+      >
+        <div class="bookings-header">
+          <div>
+            <p class="eyebrow">
+              Community activity
+            </p>
+
+            <h2>
+              Recent Posts
+            </h2>
+          </div>
+
+          <a
+            class="button secondary"
+            href="community.html"
+          >
+            View community
+          </a>
+        </div>
+
+        <div
+          class="public-profile-post-list"
+          id="publicProfilePostList"
+        ></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>
+        SyncSpace Community
+      </span>
+
+      <span>
+        Member profile information follows each account's
+        selected visibility settings.
+      </span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+    <script src="user-profile.js?v=1"></script>
+  </body>
+</html>
