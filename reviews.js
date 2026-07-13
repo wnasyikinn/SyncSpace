@@ -768,6 +768,7 @@
                   ${escapeHtml(
                     reviewStatusLabel(
                       review.status
+                      )
                   )}
                 </span>
               </div>
