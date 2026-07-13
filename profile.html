@@ -317,6 +317,91 @@
         </section>
         
         <section
+          class="bookings-card profile-network-section"
+          aria-labelledby="profileNetworkTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Community network
+              </p>
+        
+              <h2 id="profileNetworkTitle">
+                Followers and Following
+              </h2>
+        
+              <p>
+                View the SyncSpace members who follow you and
+                the members whose community posts you follow.
+              </p>
+            </div>
+        
+            <a
+              class="button secondary"
+              href="community.html"
+            >
+              Open community
+            </a>
+          </div>
+        
+          <div class="profile-network-stats">
+            <article>
+              <strong id="myFollowerCount">
+                0
+              </strong>
+        
+              <span>
+                Followers
+              </span>
+            </article>
+        
+            <article>
+              <strong id="myFollowingCount">
+                0
+              </strong>
+        
+              <span>
+                Following
+              </span>
+            </article>
+          </div>
+        
+          <div class="profile-network-columns">
+            <section aria-labelledby="myFollowersTitle">
+              <h3 id="myFollowersTitle">
+                Followers
+              </h3>
+        
+              <div
+                class="profile-network-list"
+                id="myFollowersList"
+                aria-live="polite"
+              >
+                <div class="empty-state">
+                  Loading followers...
+                </div>
+              </div>
+            </section>
+        
+            <section aria-labelledby="myFollowingTitle">
+              <h3 id="myFollowingTitle">
+                Following
+              </h3>
+        
+              <div
+                class="profile-network-list"
+                id="myFollowingList"
+                aria-live="polite"
+              >
+                <div class="empty-state">
+                  Loading followed members...
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+        
+        <section
           class="reservation-overview"
           aria-labelledby="reservationOverviewTitle"
         >
