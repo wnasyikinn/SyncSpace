@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    >
+
+    <title>Notifications | SyncSpace</title>
+
+    <link
+      rel="stylesheet"
+      href="styles.css"
+    >
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a
+        class="brand"
+        href="index.html"
+        aria-label="SyncSpace home"
+      >
+        <img
+          src="assets/syncspace-logo-mark.png"
+          alt="SyncSpace Coworking Space"
+        >
+      </a>
+
+      <nav
+        class="main-nav"
+        aria-label="Primary navigation"
+      >
+        <a href="index.html#about">
+          About
+        </a>
+
+        <a href="index.html#spaces">
+          Spaces
+        </a>
+
+        <a href="community.html">
+          Community
+        </a>
+
+        <a
+          href="notifications.html"
+          aria-current="page"
+          data-notification-link
+        >
+          Notifications
+
+          <span
+            class="notification-nav-count"
+            data-notification-count
+            hidden
+          >
+            0
+          </span>
+        </a>
+
+        <a
+          class="nav-cta"
+          href="booking.html"
+        >
+          Book a Space
+        </a>
+
+        <a
+          href="profile.html"
+          id="navProfile"
+          class="nav-profile"
+          style="display: none"
+        >
+          Profile
+        </a>
+
+        <a
+          href="admin.html"
+          id="navAdmin"
+          class="nav-profile"
+          style="display: none"
+        >
+          Admin
+        </a>
+
+        <button
+          type="button"
+          id="navLogin"
+          class="nav-login"
+        >
+          Log in
+        </button>
+
+        <button
+          type="button"
+          id="navLogout"
+          class="nav-logout"
+          style="display: none"
+        >
+          Log out
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="profile-header notification-header">
+        <div>
+          <p class="eyebrow">
+            Account activity
+          </p>
+
+          <h1>
+            Notifications
+          </h1>
+
+          <p>
+            Review follows, likes, comments, moderation decisions,
+            cancellation requests, and refund updates.
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="notification-page"
+        id="notificationPage"
+        aria-busy="true"
+      >
+        <p
+          class="form-message"
+          id="notificationPageMessage"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+        <section class="notification-toolbar">
+          <label>
+            <span>Display</span>
+
+            <select id="notificationFilter">
+              <option value="all">
+                All notifications
+              </option>
+
+              <option value="unread">
+                Unread only
+              </option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            class="button secondary"
+            id="markAllNotificationsRead"
+          >
+            Mark all as read
+          </button>
+
+          <button
+            type="button"
+            class="button secondary"
+            id="refreshNotifications"
+          >
+            Refresh
+          </button>
+        </section>
+
+        <section
+          class="notification-list"
+          id="notificationList"
+          aria-live="polite"
+        >
+          <div class="empty-state">
+            Loading notifications...
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>SyncSpace</span>
+
+      <span>
+        Account and community notifications are visible only
+        to the authenticated recipient.
+      </span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+    <script src="notifications-nav.js?v=1"></script>
+    <script src="notifications.js?v=1"></script>
+  </body>
+</html>
