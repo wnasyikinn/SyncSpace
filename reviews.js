@@ -268,20 +268,37 @@
   }
 
   function setSelectedRating(rating) {
+    const numericRating =
+      rating === null ||
+      rating === undefined ||
+      rating === ""
+        ? null
+        : Number(rating);
+  
     reviewForm
       .querySelectorAll(
         'input[name="reviewRating"]'
       )
       .forEach((input) => {
         input.checked =
-          Number(input.value) ===
-          Number(rating);
+          numericRating !== null &&
+          Number(input.value) === numericRating;
       });
-
-    reviewRatingDescription.textContent =
-      rating
-        ? `${rating} stars — ${ratingLabel(rating)}`
-        : "Select a rating from 1 to 5 stars.";
+  
+    if (numericRating) {
+      const starWord =
+        numericRating === 1
+          ? "star"
+          : "stars";
+  
+      reviewRatingDescription.textContent =
+        `${numericRating} ${starWord} selected — ` +
+        `${ratingLabel(numericRating)}.`;
+    } else {
+      reviewRatingDescription.textContent =
+        "Select the rating that best represents " +
+        "your workspace experience.";
+    }
   }
 
   function revokeReviewPreviewUrl() {
