@@ -720,95 +720,125 @@
               type="hidden"
               id="reviewWorkspaceIdInput"
             >
-
+            
             <fieldset class="review-rating-fieldset">
               <legend>
-                Rating
+                Workspace rating
               </legend>
-
+            
               <div
-                class="review-star-input"
+                class="review-rating-options"
                 id="reviewStarInput"
                 role="radiogroup"
-                aria-label="Workspace rating"
+                aria-label="Workspace rating from one to five stars"
               >
-                <input
-                  type="radio"
-                  name="reviewRating"
-                  id="reviewRating5"
-                  value="5"
-                  required
-                >
-
-                <label
-                  for="reviewRating5"
-                  title="5 stars"
-                >
-                  ★★★★★
+                <label class="review-rating-option">
+                  <input
+                    type="radio"
+                    name="reviewRating"
+                    value="1"
+                    required
+                  >
+            
+                  <span
+                    class="review-rating-stars"
+                    aria-hidden="true"
+                  >
+                    ★☆☆☆☆
+                  </span>
+            
+                  <span class="review-rating-text">
+                    <strong>1 star</strong>
+                    <small>Poor</small>
+                  </span>
                 </label>
-
-                <input
-                  type="radio"
-                  name="reviewRating"
-                  id="reviewRating4"
-                  value="4"
-                >
-
-                <label
-                  for="reviewRating4"
-                  title="4 stars"
-                >
-                  ★★★★
+            
+                <label class="review-rating-option">
+                  <input
+                    type="radio"
+                    name="reviewRating"
+                    value="2"
+                  >
+            
+                  <span
+                    class="review-rating-stars"
+                    aria-hidden="true"
+                  >
+                    ★★☆☆☆
+                  </span>
+            
+                  <span class="review-rating-text">
+                    <strong>2 stars</strong>
+                    <small>Fair</small>
+                  </span>
                 </label>
-
-                <input
-                  type="radio"
-                  name="reviewRating"
-                  id="reviewRating3"
-                  value="3"
-                >
-
-                <label
-                  for="reviewRating3"
-                  title="3 stars"
-                >
-                  ★★★
+            
+                <label class="review-rating-option">
+                  <input
+                    type="radio"
+                    name="reviewRating"
+                    value="3"
+                  >
+            
+                  <span
+                    class="review-rating-stars"
+                    aria-hidden="true"
+                  >
+                    ★★★☆☆
+                  </span>
+            
+                  <span class="review-rating-text">
+                    <strong>3 stars</strong>
+                    <small>Good</small>
+                  </span>
                 </label>
-
-                <input
-                  type="radio"
-                  name="reviewRating"
-                  id="reviewRating2"
-                  value="2"
-                >
-
-                <label
-                  for="reviewRating2"
-                  title="2 stars"
-                >
-                  ★★
+            
+                <label class="review-rating-option">
+                  <input
+                    type="radio"
+                    name="reviewRating"
+                    value="4"
+                  >
+            
+                  <span
+                    class="review-rating-stars"
+                    aria-hidden="true"
+                  >
+                    ★★★★☆
+                  </span>
+            
+                  <span class="review-rating-text">
+                    <strong>4 stars</strong>
+                    <small>Very good</small>
+                  </span>
                 </label>
-
-                <input
-                  type="radio"
-                  name="reviewRating"
-                  id="reviewRating1"
-                  value="1"
-                >
-
-                <label
-                  for="reviewRating1"
-                  title="1 star"
-                >
-                  ★
+            
+                <label class="review-rating-option">
+                  <input
+                    type="radio"
+                    name="reviewRating"
+                    value="5"
+                  >
+            
+                  <span
+                    class="review-rating-stars"
+                    aria-hidden="true"
+                  >
+                    ★★★★★
+                  </span>
+            
+                  <span class="review-rating-text">
+                    <strong>5 stars</strong>
+                    <small>Excellent</small>
+                  </span>
                 </label>
               </div>
-
+            
               <p
                 class="review-rating-description"
                 id="reviewRatingDescription"
               >
-                Select a rating from 1 to 5 stars.
+                Select the rating that best represents your workspace experience.
               </p>
             </fieldset>
 
