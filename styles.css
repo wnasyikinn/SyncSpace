@@ -1969,7 +1969,105 @@ input[readonly] {
   display: grid;
   grid-template-columns:
     repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  row-gap: 24px;
+}
+
+.profile-edit-form {
+  gap: 24px;
+}
+
+.profile-edit-form label {
+  align-content: start;
+  gap: 8px;
+}
+
+.profile-edit-form label > span {
+  display: block;
+  line-height: 1.3;
+}
+
+.profile-edit-form input,
+.profile-edit-form select,
+.profile-edit-form textarea {
+  margin: 0;
+}
+
+.profile-edit-form small {
+  display: block;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.profile-form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.profile-image-upload {
+  display: grid;
   gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.profile-image-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-image-preview {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: white;
+  background: var(--teal);
+  background-position: center;
+  background-size: cover;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.profile-image-preview.has-image span {
+  display: none;
+}
+
+.profile-image-controls {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+}
+
+.profile-image-controls input[type="file"] {
+  padding: 9px;
+  background: white;
+}
+
+.profile-image-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+@media (max-width: 650px) {
+  .profile-image-upload-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-image-preview {
+    width: 80px;
+    height: 80px;
+  }
 }
 
 @media (max-width: 850px) {
