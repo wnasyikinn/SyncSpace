@@ -753,6 +753,9 @@
 
     return `
       <article
+        id="post-${escapeHtml(
+          post.post_id
+        )}"
         class="community-post-card"
         data-post-card="${escapeHtml(
           post.post_id
