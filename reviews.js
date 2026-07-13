@@ -220,6 +220,16 @@
       "Select a rating";
   }
 
+  function reviewStatusLabel(status) {
+    const labels = {
+      published: "Published",
+      hidden: "Hidden",
+      removed: "Removed"
+    };
+  
+    return labels[status] || "Unknown";
+  }
+  
   function safeImageUrl(value) {
     if (!value) {
       return null;
@@ -756,7 +766,8 @@
                   )}"
                 >
                   ${escapeHtml(
-                    review.status
+                    reviewStatusLabel(
+                      review.status
                   )}
                 </span>
               </div>
