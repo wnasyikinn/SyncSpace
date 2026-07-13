@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    >
+
+    <title>Workspace Details | SyncSpace</title>
+
+    <link
+      rel="stylesheet"
+      href="styles.css"
+    >
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a
+        class="brand"
+        href="index.html"
+      >
+        <img
+          src="assets/syncspace-logo-mark.png"
+          alt="SyncSpace Coworking Space"
+        >
+      </a>
+
+      <nav
+        class="main-nav"
+        aria-label="Primary navigation"
+      >
+        <a href="index.html#spaces">
+          Spaces
+        </a>
+
+        <a href="community.html">
+          Community
+        </a>
+
+        <a
+          href="notifications.html"
+          data-notification-link
+          style="display: none"
+        >
+          Notifications
+
+          <span
+            class="notification-nav-count"
+            data-notification-count
+            hidden
+          >
+            0
+          </span>
+        </a>
+
+        <a
+          class="nav-cta"
+          href="booking.html"
+        >
+          Book a Space
+        </a>
+        
+        <a
+          href="notifications.html"
+          data-notification-link
+          style="display: none"
+        >
+          Notifications
+        
+          <span
+            class="notification-nav-count"
+            data-notification-count
+            hidden
+          >
+            0
+          </span>
+        </a>
+        
+        <a
+          href="profile.html"
+          id="navProfile"
+          style="display: none"
+        >
+          Profile
+        </a>
+
+        <a
+          href="admin.html"
+          id="navAdmin"
+          style="display: none"
+        >
+          Admin
+        </a>
+
+        <button
+          type="button"
+          id="navLogin"
+        >
+          Log in
+        </button>
+
+        <button
+          type="button"
+          id="navLogout"
+          style="display: none"
+        >
+          Log out
+        </button>
+      </nav>
+    </header>
+
+    <main
+      class="workspace-page"
+      id="workspacePage"
+      aria-busy="true"
+    >
+      <p
+        class="form-message"
+        id="workspacePageMessage"
+      ></p>
+
+      <section
+        class="workspace-detail-card"
+        id="workspaceDetailCard"
+        hidden
+      >
+        <img
+          id="workspaceDetailImage"
+          class="workspace-detail-image"
+          alt="Workspace"
+        >
+
+        <div class="workspace-detail-content">
+          <p
+            class="eyebrow"
+            id="workspaceDetailType"
+          ></p>
+
+          <h1 id="workspaceDetailName">
+            Workspace
+          </h1>
+
+          <p
+            class="workspace-detail-unit"
+            id="workspaceDetailUnit"
+          ></p>
+
+          <p id="workspaceDetailDescription"></p>
+
+          <dl class="workspace-detail-facts">
+            <div>
+              <dt>Layout</dt>
+              <dd id="workspaceDetailLayout"></dd>
+            </div>
+
+            <div>
+              <dt>Capacity</dt>
+              <dd id="workspaceDetailCapacity"></dd>
+            </div>
+
+            <div>
+              <dt>Average rating</dt>
+              <dd id="workspaceDetailRating"></dd>
+            </div>
+
+            <div>
+              <dt>Saved by members</dt>
+              <dd id="workspaceDetailSavedCount"></dd>
+            </div>
+          </dl>
+
+          <div class="workspace-detail-actions">
+            <button
+              type="button"
+              class="button secondary"
+              id="saveWorkspaceButton"
+            >
+              Save workspace
+            </button>
+
+            <a
+              class="button primary"
+              href="booking.html"
+            >
+              Check availability
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="bookings-card">
+        <div class="bookings-header">
+          <div>
+            <p class="eyebrow">
+              Verified experiences
+            </p>
+
+            <h2>Workspace Reviews</h2>
+          </div>
+        </div>
+
+        <div
+          class="bookings-list"
+          id="workspaceReviewList"
+        ></div>
+      </section>
+
+      <section class="bookings-card">
+        <div class="bookings-header">
+          <div>
+            <p class="eyebrow">
+              Community discussions
+            </p>
+
+            <h2>Related Community Posts</h2>
+          </div>
+        </div>
+
+        <div
+          class="bookings-list"
+          id="workspacePostList"
+        ></div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+    <script src="notifications-nav.js?v=1"></script>
+    <script src="workspace.js?v=1"></script>
+    <script src="notifications-nav.js?v=1"></script>
+  </body>
+</html>
