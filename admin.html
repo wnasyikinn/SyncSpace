@@ -179,6 +179,14 @@
           <a href="#refundManagement">
             Refunds
           </a>
+
+          <a href="#socialModeration">
+            Moderation
+          </a>
+          
+          <a href="#socialAnalytics">
+            Social Analytics
+          </a>
         </nav>
 
         <section
@@ -569,6 +577,227 @@
             </div>
           </div>
         </section>
+
+        <section
+          class="bookings-card admin-section"
+          id="socialModeration"
+          aria-labelledby="socialModerationTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Community safety
+              </p>
+
+              <h2 id="socialModerationTitle">
+                Report and Review Moderation
+              </h2>
+
+              <p>
+                Resolve reports and manage published, hidden,
+                or removed workspace reviews.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="button secondary"
+              id="refreshSocialAdminButton"
+            >
+              Refresh social data
+            </button>
+          </div>
+
+          <label class="admin-social-filter">
+            <span>Report status</span>
+
+            <select id="moderationStatusFilter">
+              <option value="open">
+                Open reports
+              </option>
+
+              <option value="all">
+                All reports
+              </option>
+
+              <option value="resolved">
+                Resolved
+              </option>
+
+              <option value="dismissed">
+                Dismissed
+              </option>
+            </select>
+          </label>
+
+          <h3>
+            Content Reports
+          </h3>
+
+          <div
+            class="admin-record-list"
+            id="moderationQueueList"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading reports...
+            </div>
+          </div>
+
+          <h3>
+            Workspace Reviews
+          </h3>
+
+          <div
+            class="admin-record-list"
+            id="adminReviewModerationList"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading workspace reviews...
+            </div>
+          </div>
+        </section>
+        <!-- Social moderation ends here -->
+
+        <!-- Social analytics starts here -->
+        <section
+          class="bookings-card admin-section"
+          id="socialAnalytics"
+          aria-labelledby="socialAnalyticsTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Social ecosystem performance
+              </p>
+
+              <h2 id="socialAnalyticsTitle">
+                Social Statistics and Analytics
+              </h2>
+            </div>
+          </div>
+
+          <div class="reservation-stats social-stat-grid">
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="socialUserCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Community users
+              </strong>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="socialPostCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Published posts
+              </strong>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="socialCommentCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Published comments
+              </strong>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="socialReviewCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Published reviews
+              </strong>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="socialFollowCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Follow relationships
+              </strong>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="socialSaveCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Saved workspaces
+              </strong>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="openReportSocialCount"
+              >
+                0
+              </span>
+
+              <strong>
+                Open reports
+              </strong>
+            </article>
+
+            <article class="reservation-stat-card">
+              <span
+                class="reservation-stat-value"
+                id="socialActivity30d"
+              >
+                0
+              </span>
+
+              <strong>
+                30-day interactions
+              </strong>
+            </article>
+          </div>
+
+          <h3>
+            Most Engaged Workspaces
+          </h3>
+
+          <div
+            class="admin-record-list"
+            id="topWorkspaceSocialList"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading workspace analytics...
+            </div>
+          </div>
+        </section>
       </section>
     </main>
 
@@ -894,5 +1123,6 @@
     <script src="auth.js"></script>
     <script src="admin.js"></script>
     <script src="notifications-nav.js?v=1"></script>
+    <script src="admin-social.js?v=1"></script>
   </body>
 </html>
