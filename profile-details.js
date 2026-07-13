@@ -131,9 +131,24 @@
       "#profileInterestsInput"
     );
 
-  const profileAvatarUrlInput =
+  const profileImageInput =
     document.querySelector(
-      "#profileAvatarUrlInput"
+      "#profileImageInput"
+    );
+  
+  const profileImagePreview =
+    document.querySelector(
+      "#profileImagePreview"
+    );
+  
+  const profileImagePreviewInitials =
+    document.querySelector(
+      "#profileImagePreviewInitials"
+    );
+  
+  const removeProfileImageButton =
+    document.querySelector(
+      "#removeProfileImageButton"
     );
 
   const profileLinkedInInput =
@@ -157,6 +172,10 @@
   let currentUser = null;
   let currentProfile = null;
   let workspaceTypes = [];
+
+  let selectedProfileImageFile = null;
+  let removeExistingProfileImage = false;
+  let profileImagePreviewUrl = null;
 
   function assertRequiredElements() {
     const requiredElements = {
@@ -194,7 +213,10 @@
       profileBioCharacterCount,
       profileSkillsInput,
       profileInterestsInput,
-      profileAvatarUrlInput,
+      profileImageInput,
+      profileImagePreview,
+      profileImagePreviewInitials,
+      removeProfileImageButton,
       profileLinkedInInput,
       profileWebsiteInput,
       saveProfileButton,
@@ -299,6 +321,182 @@
     return null;
   }
 
+  function revokeProfileImagePreviewUrl() {
+    if (profileImagePreviewUrl) {
+      URL.revokeObjectURL(
+        profileImagePreviewUrl
+      );
+  
+      profileImagePreviewUrl = null;
+    }
+  }
+  
+  function setProfileImagePreview(
+    imageUrl = null
+  ) {
+    const displayName =
+      profileFullNameInput.value.trim() ||
+      currentProfile?.full_name ||
+      currentUser?.email ||
+      "SyncSpace User";
+  
+    profileImagePreviewInitials.textContent =
+      createInitials(displayName);
+  
+    if (imageUrl) {
+      profileImagePreview.style.backgroundImage =
+        `url("${String(imageUrl)
+          .replace(/"/g, "%22")}")`;
+  
+      profileImagePreview.classList.add(
+        "has-image"
+      );
+  
+      removeProfileImageButton.hidden =
+        false;
+    } else {
+      profileImagePreview.style.backgroundImage =
+        "";
+  
+      profileImagePreview.classList.remove(
+        "has-image"
+      );
+  
+      removeProfileImageButton.hidden =
+        true;
+    }
+  }
+  
+  function validateProfileImage(file) {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ];
+  
+    const maximumSize =
+      5 * 1024 * 1024;
+  
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error(
+        "Select a JPG, PNG, or WebP image."
+      );
+    }
+  
+    if (file.size > maximumSize) {
+      throw new Error(
+        "The profile image must be 5 MB or smaller."
+      );
+    }
+  }
+  
+  function getProfileImageExtension(file) {
+    const extensions = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp"
+    };
+  
+    return extensions[file.type] || "jpg";
+  }
+  
+  async function uploadProfileImage(file) {
+    validateProfileImage(file);
+  
+    const extension =
+      getProfileImageExtension(file);
+  
+    const filePath =
+      `${currentUser.id}/` +
+      `avatar-${Date.now()}.${extension}`;
+  
+    const client =
+      getSupabaseClient();
+  
+    const { error: uploadError } =
+      await client.storage
+        .from("profile-images")
+        .upload(
+          filePath,
+          file,
+          {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type
+          }
+        );
+  
+    if (uploadError) {
+      throw uploadError;
+    }
+  
+    const { data } =
+      client.storage
+        .from("profile-images")
+        .getPublicUrl(filePath);
+  
+    if (!data?.publicUrl) {
+      throw new Error(
+        "The profile image URL could not be generated."
+      );
+    }
+  
+    return data.publicUrl;
+  }
+  
+  function extractProfileImagePath(publicUrl) {
+    if (!publicUrl) {
+      return null;
+    }
+  
+    try {
+      const url =
+        new URL(publicUrl);
+  
+      const marker =
+        "/storage/v1/object/public/profile-images/";
+  
+      const markerIndex =
+        url.pathname.indexOf(marker);
+  
+      if (markerIndex === -1) {
+        return null;
+      }
+  
+      return decodeURIComponent(
+        url.pathname.slice(
+          markerIndex + marker.length
+        )
+      );
+    } catch {
+      return null;
+    }
+  }
+  
+  async function deleteStoredProfileImage(
+    publicUrl
+  ) {
+    const filePath =
+      extractProfileImagePath(publicUrl);
+  
+    if (!filePath) {
+      return;
+    }
+  
+    const { error } =
+      await getSupabaseClient()
+        .storage
+        .from("profile-images")
+        .remove([filePath]);
+  
+    if (error) {
+      console.warn(
+        "Previous profile image could not be removed:",
+        error.message
+      );
+    }
+  }
+  
   function workStyleLabel(value) {
     const labels = {
       quiet_focus:
@@ -608,8 +806,18 @@
         currentProfile?.interests
       );
 
-    profileAvatarUrlInput.value =
-      currentProfile?.avatar_url || "";
+    selectedProfileImageFile = null;
+    removeExistingProfileImage = false;
+    
+    profileImageInput.value = "";
+    
+    revokeProfileImagePreviewUrl();
+    
+    setProfileImagePreview(
+      safeExternalUrl(
+        currentProfile?.avatar_url
+      )
+    );
 
     profileLinkedInInput.value =
       currentProfile?.linkedin_url || "";
@@ -636,7 +844,14 @@
   function closeProfileEditModal() {
     profileEditModal.hidden = true;
     document.body.style.overflow = "";
+  
     profileEditForm.reset();
+  
+    selectedProfileImageFile = null;
+    removeExistingProfileImage = false;
+  
+    revokeProfileImagePreviewUrl();
+  
     setEditMessage("");
   }
 
@@ -694,12 +909,6 @@
 
     validateUsername(username);
 
-    const avatarUrl =
-      validateOptionalUrl(
-        profileAvatarUrlInput.value.trim(),
-        "Profile image URL"
-      );
-
     const linkedInUrl =
       validateOptionalUrl(
         profileLinkedInInput.value.trim(),
@@ -719,7 +928,6 @@
         normaliseOptionalText(
           profilePhoneInput.value
         ),
-      avatar_url: avatarUrl,
       bio:
         normaliseOptionalText(
           profileBioInput.value
@@ -778,27 +986,59 @@
 
   async function saveProfile(event) {
     event.preventDefault();
-
+  
     if (!profileEditForm.checkValidity()) {
       profileEditForm.reportValidity();
       return;
     }
-
+  
     saveProfileButton.disabled = true;
-
+  
     setEditMessage(
       "Saving your profile...",
       "loading"
     );
-
+  
+    const previousAvatarUrl =
+      currentProfile?.avatar_url || null;
+  
+    let uploadedAvatarUrl = null;
+  
     try {
       const payload =
         getProfilePayload();
-
+  
       await checkUsernameAvailability(
         payload.username
       );
-
+  
+      if (selectedProfileImageFile) {
+        setEditMessage(
+          "Uploading your profile image...",
+          "loading"
+        );
+  
+        uploadedAvatarUrl =
+          await uploadProfileImage(
+            selectedProfileImageFile
+          );
+  
+        payload.avatar_url =
+          uploadedAvatarUrl;
+      } else if (
+        removeExistingProfileImage
+      ) {
+        payload.avatar_url = null;
+      } else {
+        payload.avatar_url =
+          previousAvatarUrl;
+      }
+  
+      setEditMessage(
+        "Updating your professional profile...",
+        "loading"
+      );
+  
       const { data, error } =
         await getSupabaseClient()
           .from("profiles")
@@ -806,7 +1046,7 @@
           .eq("id", currentUser.id)
           .select("*")
           .single();
-
+  
       if (error) {
         if (error.code === "23505") {
           throw new Error(
@@ -814,31 +1054,36 @@
             "Choose another username."
           );
         }
-
+  
         throw error;
       }
-
+  
+      if (
+        previousAvatarUrl &&
+        previousAvatarUrl !== data.avatar_url
+      ) {
+        await deleteStoredProfileImage(
+          previousAvatarUrl
+        );
+      }
+  
       currentProfile = data;
-
+  
       renderExpandedProfile();
-
-      /*
-       * Refresh shared navigation text and profile data
-       * used by auth.js.
-       */
+  
       await updateAuthUI(currentUser);
-
+  
       closeProfileEditModal();
-
+  
       const profilePageMessage =
         document.querySelector(
           "#profilePageMessage"
         );
-
+  
       if (profilePageMessage) {
         profilePageMessage.textContent =
           "Your professional profile was updated successfully.";
-
+  
         profilePageMessage.dataset.status =
           "success";
       }
@@ -847,15 +1092,23 @@
         "Profile update failed:",
         error
       );
-
+  
+      if (
+        uploadedAvatarUrl &&
+        uploadedAvatarUrl !== previousAvatarUrl
+      ) {
+        await deleteStoredProfileImage(
+          uploadedAvatarUrl
+        );
+      }
+  
       setEditMessage(
         error.message ||
         "Your profile could not be updated.",
         "error"
       );
     } finally {
-      saveProfileButton.disabled =
-        false;
+      saveProfileButton.disabled = false;
     }
   }
 
@@ -927,6 +1180,82 @@
     profileEditForm.addEventListener(
       "submit",
       saveProfile
+    );
+
+    profileImageInput.addEventListener(
+      "change",
+      () => {
+        const file =
+          profileImageInput.files?.[0];
+    
+        if (!file) {
+          return;
+        }
+    
+        try {
+          validateProfileImage(file);
+    
+          selectedProfileImageFile =
+            file;
+    
+          removeExistingProfileImage =
+            false;
+    
+          revokeProfileImagePreviewUrl();
+    
+          profileImagePreviewUrl =
+            URL.createObjectURL(file);
+    
+          setProfileImagePreview(
+            profileImagePreviewUrl
+          );
+    
+          setEditMessage("");
+        } catch (error) {
+          profileImageInput.value = "";
+    
+          selectedProfileImageFile =
+            null;
+    
+          setEditMessage(
+            error.message,
+            "error"
+          );
+        }
+      }
+    );
+    
+    removeProfileImageButton.addEventListener(
+      "click",
+      () => {
+        selectedProfileImageFile =
+          null;
+    
+        removeExistingProfileImage =
+          true;
+    
+        profileImageInput.value = "";
+    
+        revokeProfileImagePreviewUrl();
+    
+        setProfileImagePreview(null);
+      }
+    );
+    
+    profileFullNameInput.addEventListener(
+      "input",
+      () => {
+        if (
+          !selectedProfileImageFile &&
+          !currentProfile?.avatar_url
+        ) {
+          profileImagePreviewInitials
+            .textContent =
+              createInitials(
+                profileFullNameInput.value
+              );
+        }
+      }
     );
   }
 
