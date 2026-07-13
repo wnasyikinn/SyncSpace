@@ -3294,3 +3294,251 @@ input[readonly] {
   min-width: 130px;
   text-align: center;
 }
+
+/* --------------------------------------------------
+   Stage 6: Notifications
+-------------------------------------------------- */
+
+.notification-nav-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: white;
+  background: var(--danger);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.notification-header {
+  background: var(--surface-soft);
+}
+
+.notification-page {
+  display: grid;
+  gap: 18px;
+  width: min(1000px, calc(100% - 36px));
+  margin: 30px auto 60px;
+}
+
+.notification-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.notification-toolbar label {
+  display: grid;
+  flex: 1;
+  min-width: 200px;
+  gap: 7px;
+}
+
+.notification-list {
+  display: grid;
+  gap: 12px;
+}
+
+.notification-card {
+  display: grid;
+  grid-template-columns:
+    auto minmax(0, 1fr) auto;
+  gap: 15px;
+  align-items: start;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.notification-card.is-unread {
+  border-color: var(--teal);
+  background: var(--mint);
+}
+
+.notification-card.is-read {
+  opacity: 0.82;
+}
+
+.notification-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  font-size: 1.3rem;
+}
+
+.notification-content p {
+  margin: 7px 0;
+  line-height: 1.55;
+}
+
+.notification-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.notification-unread-dot {
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: var(--teal-dark);
+  background: white;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.notification-date {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.notification-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* --------------------------------------------------
+   Stage 7: Workspaces and favourites
+-------------------------------------------------- */
+
+.workspace-page {
+  display: grid;
+  gap: 22px;
+  width: min(1100px, calc(100% - 36px));
+  margin: 32px auto 60px;
+}
+
+.workspace-detail-card {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 0.9fr)
+    minmax(0, 1.1fr);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.workspace-detail-image {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  object-fit: cover;
+}
+
+.workspace-detail-content {
+  padding: clamp(22px, 4vw, 40px);
+}
+
+.workspace-detail-unit {
+  color: var(--teal);
+  font-weight: 800;
+}
+
+.workspace-detail-facts {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.workspace-detail-facts div {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.workspace-detail-facts dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.workspace-detail-facts dd {
+  margin: 5px 0 0;
+  font-weight: 800;
+}
+
+.workspace-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.saved-workspace-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.saved-workspace-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.saved-workspace-card > img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+
+.saved-workspace-card > div {
+  padding: 17px;
+}
+
+.social-stat-grid {
+  grid-template-columns:
+    repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.admin-social-filter {
+  display: grid;
+  max-width: 320px;
+  gap: 7px;
+  margin-bottom: 20px;
+}
+
+#socialModeration > h3,
+#socialAnalytics > h3 {
+  margin: 26px 0 14px;
+}
+
+@media (max-width: 760px) {
+  .notification-card {
+    grid-template-columns:
+      auto minmax(0, 1fr);
+  }
+
+  .notification-actions {
+    grid-column: 1 / -1;
+  }
+
+  .workspace-detail-card {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-detail-image {
+    min-height: 260px;
+  }
+
+  .workspace-detail-facts {
+    grid-template-columns: 1fr;
+  }
+}
