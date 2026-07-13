@@ -2326,7 +2326,8 @@ input[readonly] {
 .review-text {
   margin: 12px 0;
   color: var(--muted);
-  white-space: pre-wrap;
+  line-height: 1.6;
+  white-space: pre-line;
 }
 
 .review-card-image {
