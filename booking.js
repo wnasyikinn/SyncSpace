@@ -602,7 +602,7 @@
               >
                 View details
               </a>
-            
+
               <button
                 class="button ${
                   workspace.available
@@ -626,6 +626,8 @@
                 }
               </button>
             </div>
+          </div>
+        `;
 
         roomStrip.appendChild(
           card
