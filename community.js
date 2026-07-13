@@ -533,13 +533,20 @@
     const selectedFilter =
       communityFeedFilter.value;
 
+    const allowedFilters =
+      new Set([
+        "all",
+        "mine",
+        "following"
+      ]);
+
     const { data, error } =
       await getSupabaseClient().rpc(
         COMMUNITY_FEED_RPC,
         {
           p_filter:
-            selectedFilter === "mine"
-              ? "mine"
+            allowedFilters.has(selectedFilter)
+              ? selectedFilter
               : "all",
 
           p_limit: 100,
@@ -735,32 +742,42 @@
       >
         <header class="community-post-header">
           <div class="community-author">
-            ${avatarMarkup(
-              post.avatar_url,
-              displayName
-            )}
-
-            <div>
-              <strong>
-                ${escapeHtml(displayName)}
-              </strong>
-
-              <span>
-                ${
-                  post.username
-                    ? `@${escapeHtml(
-                      post.username
-                    )} · `
-                    : ""
-                }
-
-                ${escapeHtml(
-                  formatDateTime(
-                    post.created_at
-                  )
-                )}
+            <a
+              class="community-author-link"
+              href="user-profile.html?id=${encodeURIComponent(
+                post.user_id
+              )}"
+              aria-label="View ${escapeHtml(
+                displayName
+              )}'s profile"
+            >
+              ${avatarMarkup(
+                post.avatar_url,
+                displayName
+              )}
+          
+              <span class="community-author-copy">
+                <strong>
+                  ${escapeHtml(displayName)}
+                </strong>
+          
+                <span>
+                  ${
+                    post.username
+                      ? `@${escapeHtml(
+                        post.username
+                      )} · `
+                      : ""
+                  }
+          
+                  ${escapeHtml(
+                    formatDateTime(
+                      post.created_at
+                    )
+                  )}
+                </span>
               </span>
-            </div>
+            </a>
           </div>
 
           <div class="community-post-menu">
