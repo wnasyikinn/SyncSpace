@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    >
+
+    <title>Community | SyncSpace</title>
+
+    <meta
+      name="description"
+      content="Connect with SyncSpace members, share workspace experiences, post productivity tips, comment, and interact with the coworking community."
+    >
+
+    <link
+      rel="stylesheet"
+      href="styles.css"
+    >
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a
+        class="brand"
+        href="index.html"
+        aria-label="SyncSpace home"
+      >
+        <img
+          src="assets/syncspace-logo-mark.png"
+          alt="SyncSpace Coworking Space"
+        >
+      </a>
+
+      <nav
+        class="main-nav"
+        aria-label="Primary navigation"
+      >
+        <a href="index.html#about">
+          About
+        </a>
+
+        <a href="index.html#spaces">
+          Spaces
+        </a>
+
+        <a
+          href="community.html"
+          aria-current="page"
+        >
+          Community
+        </a>
+
+        <a
+          class="nav-cta"
+          href="booking.html"
+        >
+          Book a Space
+        </a>
+
+        <a
+          href="profile.html"
+          id="navProfile"
+          class="nav-profile"
+          style="display: none"
+        >
+          Profile
+        </a>
+
+        <a
+          href="admin.html"
+          id="navAdmin"
+          class="nav-profile"
+          style="display: none"
+        >
+          Admin
+        </a>
+
+        <button
+          type="button"
+          id="navLogin"
+          class="nav-login"
+        >
+          Log in
+        </button>
+
+        <button
+          type="button"
+          id="navLogout"
+          class="nav-logout"
+          style="display: none"
+        >
+          Log out
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="profile-header community-header">
+        <div>
+          <p class="eyebrow">
+            SyncSpace community
+          </p>
+
+          <h1>
+            Community Feed
+          </h1>
+
+          <p>
+            Share workspace experiences, productivity advice,
+            questions, events, and collaboration opportunities
+            with other SyncSpace members.
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="community-page"
+        id="communityPage"
+        aria-busy="true"
+      >
+        <p
+          class="form-message community-page-message"
+          id="communityPageMessage"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+        <section class="community-toolbar-card">
+          <div class="community-toolbar-heading">
+            <div>
+              <p class="eyebrow">
+                Member discussions
+              </p>
+
+              <h2>
+                Explore the community
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              class="button primary"
+              id="createPostButton"
+            >
+              Create post
+            </button>
+          </div>
+
+          <div class="community-filters">
+            <label>
+              <span>Feed</span>
+
+              <select id="communityFeedFilter">
+                <option value="all">
+                  All posts
+                </option>
+
+                <option value="mine">
+                  My posts
+                </option>
+              </select>
+            </label>
+
+            <label>
+              <span>Workspace</span>
+
+              <select id="communityWorkspaceFilter">
+                <option value="all">
+                  All workspaces
+                </option>
+              </select>
+            </label>
+
+            <label>
+              <span>Order</span>
+
+              <select id="communitySortOrder">
+                <option value="newest">
+                  Newest first
+                </option>
+
+                <option value="oldest">
+                  Oldest first
+                </option>
+
+                <option value="most_liked">
+                  Most liked
+                </option>
+
+                <option value="most_discussed">
+                  Most discussed
+                </option>
+              </select>
+            </label>
+
+            <button
+              type="button"
+              class="button secondary"
+              id="refreshCommunityButton"
+            >
+              Refresh
+            </button>
+          </div>
+        </section>
+
+        <section
+          class="community-feed"
+          id="communityFeed"
+          aria-live="polite"
+        >
+          <div class="empty-state">
+            Loading community posts...
+          </div>
+        </section>
+      </section>
+
+      <div
+        class="admin-modal-overlay"
+        id="postModal"
+        hidden
+      >
+        <section
+          class="admin-modal community-post-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="postModalTitle"
+        >
+          <button
+            type="button"
+            class="auth-close"
+            id="closePostModal"
+            aria-label="Close post form"
+          >
+            &times;
+          </button>
+
+          <p class="eyebrow">
+            Community contribution
+          </p>
+
+          <h2 id="postModalTitle">
+            Create Community Post
+          </h2>
+
+          <form
+            class="admin-form community-post-form"
+            id="postForm"
+          >
+            <input
+              type="hidden"
+              id="postIdInput"
+            >
+
+            <div class="profile-form-grid">
+              <label>
+                <span>Post category</span>
+
+                <select
+                  id="postTypeInput"
+                  required
+                >
+                  <option value="general">
+                    General discussion
+                  </option>
+
+                  <option value="workspace_experience">
+                    Workspace experience
+                  </option>
+
+                  <option value="productivity_tip">
+                    Productivity tip
+                  </option>
+
+                  <option value="collaboration">
+                    Collaboration request
+                  </option>
+
+                  <option value="event">
+                    Event announcement
+                  </option>
+
+                  <option value="question">
+                    Question
+                  </option>
+                </select>
+              </label>
+
+              <label>
+                <span>Related workspace</span>
+
+                <select id="postWorkspaceInput">
+                  <option value="">
+                    No specific workspace
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              <span>Post content</span>
+
+              <textarea
+                id="postContentInput"
+                rows="7"
+                minlength="1"
+                maxlength="3000"
+                placeholder="Share your workspace experience, question, tip, event, or collaboration opportunity."
+                required
+              ></textarea>
+
+              <small>
+                <span id="postCharacterCount">0</span>/3000
+              </small>
+            </label>
+
+            <div class="community-image-upload">
+              <span class="profile-field-title">
+                Optional post image
+              </span>
+
+              <div class="community-image-upload-row">
+                <div
+                  class="community-image-preview"
+                  id="postImagePreview"
+                  aria-label="Selected post image preview"
+                >
+                  <span>
+                    No image
+                  </span>
+                </div>
+
+                <div class="community-image-controls">
+                  <label>
+                    <span>Select image</span>
+
+                    <input
+                      type="file"
+                      id="postImageInput"
+                      accept="image/jpeg,image/png,image/webp"
+                    >
+                  </label>
+
+                  <p class="profile-image-help">
+                    JPG, PNG, or WebP. Maximum file size: 5 MB.
+                  </p>
+
+                  <button
+                    type="button"
+                    class="button secondary"
+                    id="removePostImageButton"
+                    hidden
+                  >
+                    Remove image
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="reservation-card-actions">
+              <button
+                type="button"
+                class="button secondary"
+                id="cancelPostButton"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                class="button primary"
+                id="savePostButton"
+              >
+                Publish post
+              </button>
+            </div>
+
+            <p
+              class="form-message"
+              id="postFormMessage"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </form>
+        </section>
+      </div>
+
+      <div
+        class="admin-modal-overlay"
+        id="reportModal"
+        hidden
+      >
+        <section
+          class="admin-modal report-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reportModalTitle"
+        >
+          <button
+            type="button"
+            class="auth-close"
+            id="closeReportModal"
+            aria-label="Close report form"
+          >
+            &times;
+          </button>
+
+          <p class="eyebrow">
+            Community safety
+          </p>
+
+          <h2 id="reportModalTitle">
+            Report Content
+          </h2>
+
+          <p id="reportTargetDescription">
+            Report the selected content for administrator review.
+          </p>
+
+          <form
+            class="admin-form"
+            id="reportForm"
+          >
+            <input
+              type="hidden"
+              id="reportTargetType"
+            >
+
+            <input
+              type="hidden"
+              id="reportTargetId"
+            >
+
+            <label>
+              <span>Reason</span>
+
+              <select
+                id="reportReasonInput"
+                required
+              >
+                <option value="">
+                  Select a reason
+                </option>
+
+                <option value="spam">
+                  Spam
+                </option>
+
+                <option value="harassment">
+                  Harassment
+                </option>
+
+                <option value="false_information">
+                  False information
+                </option>
+
+                <option value="inappropriate_content">
+                  Inappropriate content
+                </option>
+
+                <option value="irrelevant_promotion">
+                  Irrelevant promotion
+                </option>
+
+                <option value="other">
+                  Other
+                </option>
+              </select>
+            </label>
+
+            <label>
+              <span>Additional details</span>
+
+              <textarea
+                id="reportDetailsInput"
+                rows="5"
+                maxlength="1000"
+                placeholder="Briefly explain why this content should be reviewed."
+              ></textarea>
+
+              <small>
+                Optional. Maximum 1000 characters.
+              </small>
+            </label>
+
+            <div class="reservation-card-actions">
+              <button
+                type="button"
+                class="button secondary"
+                id="cancelReportButton"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                class="button primary"
+                id="submitReportButton"
+              >
+                Submit report
+              </button>
+            </div>
+
+            <p
+              class="form-message"
+              id="reportFormMessage"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span>
+        SyncSpace Community
+      </span>
+
+      <span>
+        Community posts and interactions are managed through
+        authenticated accounts and database access policies.
+      </span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="auth.js"></script>
+    <script src="community.js?v=1"></script>
+  </body>
+</html>
