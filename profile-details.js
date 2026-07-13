@@ -521,7 +521,6 @@
   function visibilityLabel(value) {
     const labels = {
       public: "Public",
-      connections_only: "Connections only",
       private: "Private"
     };
 
