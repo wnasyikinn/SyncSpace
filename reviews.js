@@ -786,11 +786,9 @@
                 </strong>
               </div>
 
-              <p class="review-text">
-                ${escapeHtml(
-                  review.review_text
-                )}
-              </p>
+              <p class="review-text">${escapeHtml(
+                String(review.review_text || "").trim()
+              )}</p>
 
               ${
                 imageUrl
@@ -1107,11 +1105,9 @@
                 )}
               </div>
 
-              <p class="review-text">
-                ${escapeHtml(
-                  review.review_text
-                )}
-              </p>
+              <p class="review-text">${escapeHtml(
+                String(review.review_text || "").trim()
+              )}</p>
 
               ${
                 imageUrl
