@@ -754,7 +754,8 @@
             const protectedPages = [
               "profile.html",
               "payment.html",
-              "admin.html"
+              "admin.html",
+              "community.html"
             ];
 
             const currentPage =
