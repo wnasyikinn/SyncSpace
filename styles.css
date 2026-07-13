@@ -2441,3 +2441,18 @@ input[readonly] {
     max-width: 260px;
   }
 }
+
+.status-published {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.status-hidden {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.status-removed {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
