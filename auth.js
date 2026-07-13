@@ -756,7 +756,9 @@
               "payment.html",
               "admin.html",
               "community.html",
-              "user-profile.html"
+              "user-profile.html",
+              "notifications.html",
+              "workspace.html"
             ];
 
             const currentPage =
