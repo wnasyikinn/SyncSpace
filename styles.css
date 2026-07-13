@@ -3281,3 +3281,16 @@ input[readonly] {
     border-bottom: 1px solid var(--line);
   }
 }
+
+.room-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.room-card-actions .button {
+  flex: 1;
+  min-width: 130px;
+  text-align: center;
+}
