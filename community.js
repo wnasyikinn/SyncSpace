@@ -851,14 +851,38 @@
             data-like-post="${escapeHtml(
               post.post_id
             )}"
-          >
-            ${
+            aria-pressed="${
               post.liked_by_me
-                ? "Unlike"
-                : "Like"
-            }
-
-            <span>
+                ? "true"
+                : "false"
+            }"
+            aria-label="${
+              post.liked_by_me
+                ? "Remove like from this post"
+                : "Like this post"
+            }"
+            title="${
+              post.liked_by_me
+                ? "Remove like"
+                : "Like this post"
+            }"
+          >
+            <span
+              class="community-like-icon"
+              aria-hidden="true"
+            >
+              👍
+            </span>
+          
+            <span class="community-like-label">
+              ${
+                post.liked_by_me
+                  ? "Liked"
+                  : "Like"
+              }
+            </span>
+          
+            <span class="community-like-count">
               ${escapeHtml(
                 Number(
                   post.like_count || 0
