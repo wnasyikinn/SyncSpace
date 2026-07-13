@@ -504,6 +504,138 @@
 
         <section
           class="bookings-card"
+          id="reviewableBookingsSection"
+          aria-labelledby="reviewableBookingsTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Verified workspace feedback
+              </p>
+
+              <h2 id="reviewableBookingsTitle">
+                Review Completed Visits
+              </h2>
+
+              <p>
+                Only completed and paid reservations can be reviewed.
+                Each reservation may receive one verified review.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="reviewableBookingsList"
+            class="bookings-list"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading reviewable reservations...
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card"
+          id="myReviewsSection"
+          aria-labelledby="myReviewsTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Your feedback
+              </p>
+
+              <h2 id="myReviewsTitle">
+                My Reviews
+              </h2>
+
+              <p>
+                View, edit, or delete reviews that you submitted
+                for completed SyncSpace reservations.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="myReviewsList"
+            class="bookings-list"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading your reviews...
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card"
+          id="workspaceRatingsSection"
+          aria-labelledby="workspaceRatingsTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Community ratings
+              </p>
+
+              <h2 id="workspaceRatingsTitle">
+                Workspace Rating Summary
+              </h2>
+
+              <p>
+                Ratings are calculated from published reviews
+                submitted by verified SyncSpace customers.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="workspaceRatingSummaryList"
+            class="workspace-rating-grid"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading workspace ratings...
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bookings-card"
+          id="recentReviewsSection"
+          aria-labelledby="recentReviewsTitle"
+        >
+          <div class="bookings-header">
+            <div>
+              <p class="eyebrow">
+                Community experiences
+              </p>
+
+              <h2 id="recentReviewsTitle">
+                Recent Workspace Reviews
+              </h2>
+
+              <p>
+                Read recent published feedback from verified
+                SyncSpace customers.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="recentReviewsList"
+            class="bookings-list"
+            aria-live="polite"
+          >
+            <div class="empty-state">
+              Loading published reviews...
+            </div>
+          </div>
+        </section>
+        
+        <section
+          class="bookings-card"
           aria-labelledby="pastReservationsTitle"
         >
           <div class="bookings-header">
@@ -535,6 +667,240 @@
         </section>
       </section>
 
+      <div
+        class="admin-modal-overlay"
+        id="reviewModal"
+        hidden
+      >
+        <section
+          class="admin-modal review-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reviewModalTitle"
+        >
+          <button
+            type="button"
+            class="auth-close"
+            id="closeReviewModal"
+            aria-label="Close review form"
+          >
+            &times;
+          </button>
+
+          <p class="eyebrow">
+            Verified workspace review
+          </p>
+
+          <h2 id="reviewModalTitle">
+            Review Your Workspace
+          </h2>
+
+          <p
+            class="review-modal-workspace"
+            id="reviewModalWorkspace"
+          >
+            Selected workspace
+          </p>
+
+          <form
+            class="admin-form review-form"
+            id="reviewForm"
+          >
+            <input
+              type="hidden"
+              id="reviewIdInput"
+            >
+
+            <input
+              type="hidden"
+              id="reviewBookingIdInput"
+            >
+
+            <input
+              type="hidden"
+              id="reviewWorkspaceIdInput"
+            >
+
+            <fieldset class="review-rating-fieldset">
+              <legend>
+                Rating
+              </legend>
+
+              <div
+                class="review-star-input"
+                id="reviewStarInput"
+                role="radiogroup"
+                aria-label="Workspace rating"
+              >
+                <input
+                  type="radio"
+                  name="reviewRating"
+                  id="reviewRating5"
+                  value="5"
+                  required
+                >
+
+                <label
+                  for="reviewRating5"
+                  title="5 stars"
+                >
+                  ★
+                </label>
+
+                <input
+                  type="radio"
+                  name="reviewRating"
+                  id="reviewRating4"
+                  value="4"
+                >
+
+                <label
+                  for="reviewRating4"
+                  title="4 stars"
+                >
+                  ★
+                </label>
+
+                <input
+                  type="radio"
+                  name="reviewRating"
+                  id="reviewRating3"
+                  value="3"
+                >
+
+                <label
+                  for="reviewRating3"
+                  title="3 stars"
+                >
+                  ★
+                </label>
+
+                <input
+                  type="radio"
+                  name="reviewRating"
+                  id="reviewRating2"
+                  value="2"
+                >
+
+                <label
+                  for="reviewRating2"
+                  title="2 stars"
+                >
+                  ★
+                </label>
+
+                <input
+                  type="radio"
+                  name="reviewRating"
+                  id="reviewRating1"
+                  value="1"
+                >
+
+                <label
+                  for="reviewRating1"
+                  title="1 star"
+                >
+                  ★
+                </label>
+              </div>
+
+              <p
+                class="review-rating-description"
+                id="reviewRatingDescription"
+              >
+                Select a rating from 1 to 5 stars.
+              </p>
+            </fieldset>
+
+            <label>
+              <span>Review</span>
+
+              <textarea
+                id="reviewTextInput"
+                rows="6"
+                minlength="10"
+                maxlength="2000"
+                placeholder="Describe your workspace experience, facilities, comfort, cleanliness, or suitability."
+                required
+              ></textarea>
+
+              <small>
+                Minimum 10 characters.
+                <span id="reviewCharacterCount">0</span>/2000
+              </small>
+            </label>
+
+            <div class="review-image-upload">
+              <span class="profile-field-title">
+                Review image
+              </span>
+
+              <div class="review-image-upload-row">
+                <div
+                  class="review-image-preview"
+                  id="reviewImagePreview"
+                  aria-label="Selected review image preview"
+                >
+                  <span>
+                    No image
+                  </span>
+                </div>
+
+                <div class="review-image-controls">
+                  <label>
+                    <span>Select an optional image</span>
+
+                    <input
+                      type="file"
+                      id="reviewImageInput"
+                      accept="image/jpeg,image/png,image/webp"
+                    >
+                  </label>
+
+                  <p class="profile-image-help">
+                    JPG, PNG, or WebP. Maximum file size: 5 MB.
+                  </p>
+
+                  <button
+                    type="button"
+                    class="button secondary"
+                    id="removeReviewImageButton"
+                    hidden
+                  >
+                    Remove review image
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="reservation-card-actions">
+              <button
+                type="button"
+                class="button secondary"
+                id="cancelReviewButton"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                class="button primary"
+                id="saveReviewButton"
+              >
+                Publish review
+              </button>
+            </div>
+
+            <p
+              class="form-message"
+              id="reviewFormMessage"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </form>
+        </section>
+      </div>
+      
       <div
         class="admin-modal-overlay"
         id="profileEditModal"
@@ -865,5 +1231,6 @@
     <script src="auth.js"></script>
     <script src="profile.js"></script>
     <script src="profile-details.js?v=3"></script>
+    <script src="reviews.js?v=1"></script>
   </body>
 </html>
