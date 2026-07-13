@@ -2138,45 +2138,118 @@ input[readonly] {
   font-weight: 900;
 }
 
-.review-star-input {
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-  gap: 4px;
+.review-rating-options {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.review-star-input input {
+.review-rating-option {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: white;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.review-rating-option:hover {
+  border-color: var(--teal);
+  background: var(--surface-soft);
+  transform: translateY(-1px);
+}
+
+.review-rating-option input {
   position: absolute;
   width: 1px;
   height: 1px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
   opacity: 0;
   pointer-events: none;
 }
 
-.review-star-input label {
-  display: inline-block;
+.review-rating-stars {
   color: #c9cfcc;
-  cursor: pointer;
-  font-size: 2.2rem;
+  font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+  font-weight: 900;
+  letter-spacing: 1px;
   line-height: 1;
-  transition:
-    color 140ms ease,
-    transform 140ms ease;
+  white-space: nowrap;
 }
 
-.review-star-input label:hover,
-.review-star-input label:hover ~ label,
-.review-star-input input:checked ~ label {
+.review-rating-text {
+  display: grid;
+  gap: 2px;
+}
+
+.review-rating-text strong {
+  font-size: 0.86rem;
+}
+
+.review-rating-text small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.review-rating-option:has(input:checked) {
+  border-color: var(--teal);
+  background: var(--mint);
+  box-shadow:
+    0 0 0 3px rgba(18, 106, 103, 0.12);
+}
+
+.review-rating-option:has(input:checked)
+.review-rating-stars {
   color: var(--gold);
 }
 
-.review-star-input label:hover {
-  transform: scale(1.08);
-}
-
-.review-star-input input:focus-visible + label {
+.review-rating-option:has(input:focus-visible) {
   outline: 3px solid rgba(18, 106, 103, 0.32);
   outline-offset: 3px;
+}
+
+.review-rating-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .review-rating-options {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 440px) {
+  .review-rating-options {
+    grid-template-columns: 1fr;
+  }
+
+  .review-rating-option {
+    grid-template-columns:
+      minmax(90px, auto)
+      minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    text-align: left;
+  }
 }
 
 .review-rating-description {
