@@ -750,21 +750,50 @@
               </label>
             </div>
       
-            <label>
-              <span>Profile image URL</span>
-      
-              <input
-                type="url"
-                id="profileAvatarUrlInput"
-                maxlength="1000"
-                placeholder="https://example.com/profile-image.jpg"
-              >
-      
-              <small>
-                Stage 2 uses an image URL. Supabase Storage upload can be
-                added later when post and review image uploads are implemented.
-              </small>
-            </label>
+            <div class="profile-image-upload">
+              <div>
+                <span class="profile-field-title">
+                  Profile image
+                </span>
+              </div>
+            
+              <div class="profile-image-upload-row">
+                <div
+                  class="profile-image-preview"
+                  id="profileImagePreview"
+                  aria-label="Selected profile image preview"
+                >
+                  <span id="profileImagePreviewInitials">
+                    SS
+                  </span>
+                </div>
+            
+                <div class="profile-image-controls">
+                  <label>
+                    <span>Select an image</span>
+            
+                    <input
+                      type="file"
+                      id="profileImageInput"
+                      accept="image/jpeg,image/png,image/webp"
+                    >
+                  </label>
+            
+                  <p class="profile-image-help">
+                    Use a JPG, PNG, or WebP image. Maximum file size: 5 MB.
+                  </p>
+            
+                  <button
+                    type="button"
+                    class="button secondary"
+                    id="removeProfileImageButton"
+                    hidden
+                  >
+                    Remove profile image
+                  </button>
+                </div>
+              </div>
+            </div>
       
             <div class="profile-form-grid">
               <label>
