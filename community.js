@@ -636,33 +636,51 @@
       profilesById.get(
         comment.user_id
       );
-
+  
     const displayName =
       author?.full_name ||
       author?.username ||
       "SyncSpace member";
-
+  
     const ownComment =
       comment.user_id ===
       currentUser.id;
-
+  
+    const profileUrl =
+      `user-profile.html?id=${encodeURIComponent(
+        comment.user_id
+      )}`;
+  
     return `
       <article class="community-comment">
         <div class="community-comment-avatar">
-          ${avatarMarkup(
-            author?.avatar_url,
-            displayName,
-            "community-small-avatar"
-          )}
+          <a
+            class="community-comment-profile-link"
+            href="${profileUrl}"
+            aria-label="View ${escapeHtml(
+              displayName
+            )}'s profile"
+          >
+            ${avatarMarkup(
+              author?.avatar_url,
+              displayName,
+              "community-small-avatar"
+            )}
+          </a>
         </div>
-
+  
         <div class="community-comment-body">
           <div class="community-comment-heading">
             <div>
-              <strong>
-                ${escapeHtml(displayName)}
-              </strong>
-
+              <a
+                class="community-comment-name-link"
+                href="${profileUrl}"
+              >
+                <strong>
+                  ${escapeHtml(displayName)}
+                </strong>
+              </a>
+  
               <span>
                 ${escapeHtml(
                   formatDateTime(
@@ -671,7 +689,7 @@
                 )}
               </span>
             </div>
-
+  
             <div class="community-inline-actions">
               ${
                 ownComment
@@ -700,7 +718,7 @@
               }
             </div>
           </div>
-
+  
           <p>${escapeHtml(
             String(
               comment.content || ""
