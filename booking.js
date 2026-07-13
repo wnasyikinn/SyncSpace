@@ -593,30 +593,39 @@
                 `
             }
 
-            <button
-              class="button ${
-                workspace.available
-                  ? "primary"
-                  : "disabled"
-              }"
-              type="button"
-              data-workspace-id="${escapeHtml(
-                workspace.id
-              )}"
-              ${
-                workspace.available
-                  ? ""
-                  : "disabled"
-              }
-            >
-              ${
-                workspace.available
-                  ? "Select workspace"
-                  : "Not available"
-              }
-            </button>
-          </div>
-        `;
+            <div class="room-card-actions">
+              <a
+                class="button secondary"
+                href="workspace.html?id=${encodeURIComponent(
+                  workspace.id
+                )}"
+              >
+                View details
+              </a>
+            
+              <button
+                class="button ${
+                  workspace.available
+                    ? "primary"
+                    : "disabled"
+                }"
+                type="button"
+                data-workspace-id="${escapeHtml(
+                  workspace.id
+                )}"
+                ${
+                  workspace.available
+                    ? ""
+                    : "disabled"
+                }
+              >
+                ${
+                  workspace.available
+                    ? "Select workspace"
+                    : "Not available"
+                }
+              </button>
+            </div>
 
         roomStrip.appendChild(
           card
