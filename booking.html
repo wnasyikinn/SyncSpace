@@ -22,6 +22,11 @@
 
     <link
       rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+    
+    <link
+      rel="stylesheet"
       href="styles.css"
     >
   </head>
@@ -225,6 +230,35 @@
             </select>
           </label>
 
+          <label class="location-filter">
+            <span>
+              Branch
+            </span>
+          
+            <select id="branchFilter">
+              <option value="all">
+                All branches
+              </option>
+            </select>
+          </label>
+          
+          <div class="location-filter-actions">
+            <button
+              type="button"
+              class="button secondary"
+              id="useMyLocationButton"
+            >
+              Use my location
+            </button>
+          
+            <span
+              class="location-status"
+              id="locationStatus"
+              role="status"
+              aria-live="polite"
+            ></span>
+          </div>
+
           <label class="pax-filter">
             <span>Number of people</span>
 
@@ -251,6 +285,41 @@
             </span>
           </label>
         </form>
+
+        <section
+          class="booking-location-panel"
+          aria-labelledby="branchMapTitle"
+        >
+          <div class="booking-location-copy">
+            <p class="eyebrow">
+              Location discovery
+            </p>
+        
+            <h2 id="branchMapTitle">
+              Find a nearby SyncSpace branch
+            </h2>
+        
+            <p>
+              Select a branch manually or allow SyncSpace to identify
+              the nearest branch based on your current location.
+            </p>
+        
+            <p
+              class="location-summary"
+              id="locationSummary"
+              aria-live="polite"
+            >
+              Loading branch locations...
+            </p>
+          </div>
+        
+          <div
+            class="branch-map"
+            id="branchMap"
+            role="application"
+            aria-label="Interactive map of SyncSpace branches"
+          ></div>
+        </section>
 
         <div class="room-toolbar">
           <p
@@ -443,5 +512,11 @@
     <script src="auth.js"></script>
     <script src="booking.js?v=4"></script>
     <script src="notifications-nav.js?v=1"></script>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+    
+    <script src="booking-location.js"></script>
   </body>
 </html>
