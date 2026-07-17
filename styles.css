@@ -4341,7 +4341,7 @@ main div[id] {
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
-  color: var(--teal-dark);
+  color: var(--info);
   background: var(--surface);
   box-shadow: none;
   cursor: pointer;
@@ -4370,15 +4370,15 @@ main div[id] {
 
 .location-filter-actions
 #useMyLocationButton:hover {
-  border-color: var(--teal);
+  border-color: var(--info);
   color: white;
-  background: var(--teal);
+  background: var(--info);
   transform: translateY(-1px);
 }
 
 .location-filter-actions
 #useMyLocationButton:focus-visible {
-  border-color: var(--teal);
+  border-color: var(--info);
   outline: 3px solid rgba(18, 106, 103, 0.18);
   outline-offset: 2px;
 }
