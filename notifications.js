@@ -70,6 +70,9 @@
 
   function notificationIcon(type) {
     const icons = {
+      /*
+       * Member and community notifications
+       */
       new_follower: "👤",
       post_like: "👍",
       post_comment: "💬",
@@ -79,9 +82,29 @@
       refund_rejected: "❌",
       refund_processing: "⏳",
       refund_completed: "💳",
-      content_moderation: "🛡️"
+      content_moderation: "🛡️",
+  
+      /*
+       * Administrator operational notifications
+       */
+      admin_new_profile: "👤",
+      admin_new_booking: "📅",
+      admin_payment_completed: "💳",
+      admin_payment_failed: "⚠️",
+      admin_cancellation_request: "↩️",
+  
+      /*
+       * Administrator social and moderation
+       * notification types reserved for later steps.
+       */
+      admin_content_report: "🚩",
+      admin_review_submitted: "⭐",
+      admin_post_reported: "🚩",
+      admin_comment_reported: "💬",
+      admin_workspace_created: "🏢",
+      admin_workspace_updated: "🏢"
     };
-
+  
     return icons[type] || "🔔";
   }
 
