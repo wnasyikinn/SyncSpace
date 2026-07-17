@@ -4331,17 +4331,17 @@ main div[id] {
   flex: 0 0 44px;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  min-width: 30px;
-  max-width: 30px;
-  height: 30px;
-  min-height: 30px;
-  max-height: 30px;
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
   margin: 0;
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
-  color: var(--info);
+  color: var(--teal-dark);
   background: var(--surface);
   box-shadow: none;
   cursor: pointer;
@@ -4370,15 +4370,15 @@ main div[id] {
 
 .location-filter-actions
 #useMyLocationButton:hover {
-  border-color: var(--info);
+  border-color: var(--teal);
   color: white;
-  background: var(--info);
+  background: var(--teal);
   transform: translateY(-1px);
 }
 
 .location-filter-actions
 #useMyLocationButton:focus-visible {
-  border-color: var(--info);
+  border-color: var(--teal);
   outline: 3px solid rgba(18, 106, 103, 0.18);
   outline-offset: 2px;
 }
