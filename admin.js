@@ -171,6 +171,9 @@
   let currentUser = null;
   let currentProfile = null;
 
+  let adminRealtimeChannel = null;
+  let adminRealtimeRefreshTimer = null;
+
   let profiles = [];
   let workspaceTypes = [];
   let workspaces = [];
@@ -2660,6 +2663,153 @@
     }
   }
 
+   function scheduleAdminRealtimeRefresh(
+    delay = 500
+  ) {
+    window.clearTimeout(
+      adminRealtimeRefreshTimer
+    );
+  
+    adminRealtimeRefreshTimer =
+      window.setTimeout(
+        () => {
+          /*
+           * Avoid replacing form contents while an
+           * administrator is editing a workspace or
+           * processing a refund request.
+           */
+          if (
+            !workspaceModal.hidden ||
+            !refundActionModal.hidden
+          ) {
+            scheduleAdminRealtimeRefresh(
+              1000
+            );
+  
+            return;
+          }
+  
+          /*
+           * Avoid starting another request while the
+           * administrator data is already loading.
+           */
+          if (
+            adminContent.getAttribute(
+              "aria-busy"
+            ) === "true"
+          ) {
+            scheduleAdminRealtimeRefresh(
+              700
+            );
+  
+            return;
+          }
+  
+          void loadAdminData();
+        },
+        delay
+      );
+  }
+  
+  function stopAdminRealtimeSubscription() {
+    window.clearTimeout(
+      adminRealtimeRefreshTimer
+    );
+  
+    adminRealtimeRefreshTimer = null;
+  
+    if (!adminRealtimeChannel) {
+      return;
+    }
+  
+    void getSupabaseClient()
+      .removeChannel(
+        adminRealtimeChannel
+      );
+  
+    adminRealtimeChannel = null;
+  }
+  
+  function startAdminRealtimeSubscription() {
+    if (!currentUser?.id) {
+      return;
+    }
+  
+    stopAdminRealtimeSubscription();
+  
+    const handleOperationalChange =
+      () => {
+        scheduleAdminRealtimeRefresh();
+      };
+  
+    adminRealtimeChannel =
+      getSupabaseClient()
+        .channel(
+          `syncspace-admin-operations-${currentUser.id}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "profiles"
+          },
+          handleOperationalChange
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "bookings"
+          },
+          handleOperationalChange
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "payments"
+          },
+          handleOperationalChange
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "refunds"
+          },
+          handleOperationalChange
+        )
+        .subscribe(
+          (status) => {
+            if (
+              status === "SUBSCRIBED"
+            ) {
+              console.log(
+                "Administrator operational " +
+                "Realtime subscription active."
+              );
+  
+              return;
+            }
+  
+            if (
+              status === "CHANNEL_ERROR" ||
+              status === "TIMED_OUT"
+            ) {
+              console.warn(
+                "Administrator Realtime updates " +
+                "are unavailable. Manual and " +
+                "focus-based refresh remain active."
+              );
+            }
+          }
+        );
+  }
+  
   function registerEventListeners() {
     refreshAdminButton.addEventListener(
       "click",
@@ -2784,6 +2934,11 @@
           void loadAdminData();
         }
       }
+    );
+
+    window.addEventListener(
+      "beforeunload",
+      stopAdminRealtimeSubscription
     );    
   }
 
@@ -2818,6 +2973,7 @@
       );
 
     registerEventListeners();
+    startAdminRealtimeSubscription();
     await loadAdminData();
   }
 
