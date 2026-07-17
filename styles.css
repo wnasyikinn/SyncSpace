@@ -4331,12 +4331,12 @@ main div[id] {
   flex: 0 0 44px;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  min-width: 28px;
-  max-width: 28px;
-  height: 28px;
-  min-height: 28px;
-  max-height: 28px;
+  width: 44px;
+  min-width: 44px;
+  max-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
   margin: 0;
   padding: 0;
   border: 1px solid var(--line);
