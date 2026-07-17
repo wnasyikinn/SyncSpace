@@ -3977,3 +3977,57 @@ input[readonly] {
     width: 100%;
   }
 }
+
+.header-notification-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 50%;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.header-notification-link:hover,
+.header-notification-link:focus-visible {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.header-notification-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.header-notification-icon {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.header-notification-badge {
+  position: absolute;
+  top: 3px;
+  right: 1px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  border-radius: 999px;
+  background-color: #dc3545;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
