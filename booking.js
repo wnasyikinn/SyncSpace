@@ -30,6 +30,9 @@
   const roomType =
     document.querySelector("#roomType");
 
+  const branchFilter =
+  document.querySelector("#branchFilter");
+
   const peopleCount =
     document.querySelector("#peopleCount");
 
@@ -87,6 +90,7 @@
       timeSlot,
       roomType,
       peopleCount,
+      branchFilter,
       availableOnly,
       selectedRoomName,
       summaryDate,
@@ -672,6 +676,11 @@
 
           p_party_size:
             search.partySize
+
+          p_branch_id:
+            branchFilter.value === "all"
+              ? null
+              : branchFilter.value
         }
       );
 
