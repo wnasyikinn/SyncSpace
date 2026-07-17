@@ -4400,3 +4400,76 @@ main div[id] {
   font-size: 0.76rem;
   line-height: 1.35;
 }
+
+/* --------------------------------------------------
+   Header notification icon
+-------------------------------------------------- */
+
+.notification-nav-link {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 42px;
+  place-items: center;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  line-height: 1;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.notification-nav-link:hover,
+.notification-nav-link:focus-visible {
+  border-color: var(--line);
+  color: var(--teal-dark);
+  background: var(--surface-soft);
+}
+
+.notification-nav-icon {
+  display: block;
+  width: 23px;
+  height: 23px;
+  fill: none;
+  pointer-events: none;
+}
+
+/*
+ * Unread-count badge positioned over the
+ * upper-right corner of the bell icon.
+ */
+.notification-nav-link
+.notification-nav-count {
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  margin: 0;
+  padding: 0 5px;
+  border: 2px solid var(--paper);
+  border-radius: 999px;
+  color: #ffffff;
+  background: var(--danger);
+  font-size: 0.66rem;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/*
+ * Retain the HTML hidden attribute until
+ * notifications-nav.js reveals the badge.
+ */
+.notification-nav-link
+.notification-nav-count[hidden] {
+  display: none !important;
+}
