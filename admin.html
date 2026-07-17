@@ -783,7 +783,93 @@
               </strong>
             </article>
           </div>
+          
+          <div class="analytics-chart-grid">
+            <article class="analytics-chart-card">
+              <div class="analytics-chart-heading">
+                <p class="eyebrow">
+                  Recent engagement
+                </p>
 
+                <h3>
+                  30-Day Interaction Mix
+                </h3>
+
+                <p>
+                  Distribution of posts, comments,
+                  reviews and follow relationships
+                  created during the latest
+                  30-day period.
+                </p>
+              </div>
+
+              <div class="analytics-chart-frame">
+                <canvas
+                  id="socialActivityMixChart"
+                  aria-label="Doughnut chart showing 30-day social interactions"
+                  role="img"
+                ></canvas>
+              </div>
+            </article>
+
+            <article class="analytics-chart-card">
+              <div class="analytics-chart-heading">
+                <p class="eyebrow">
+                  Ecosystem composition
+                </p>
+
+                <h3>
+                  Overall Community Activity
+                </h3>
+
+                <p>
+                  Comparison of the main content,
+                  relationship and personalisation
+                  activities recorded by SyncSpace.
+                </p>
+              </div>
+
+              <div class="analytics-chart-frame">
+                <canvas
+                  id="socialTotalsChart"
+                  aria-label="Bar chart comparing overall community activities"
+                  role="img"
+                ></canvas>
+              </div>
+            </article>
+
+            <article
+              class="analytics-chart-card analytics-chart-wide"
+            >
+              <div class="analytics-chart-heading">
+                <p class="eyebrow">
+                  Workspace comparison
+                </p>
+
+                <h3>
+                  Workspace Engagement
+                </h3>
+
+                <p>
+                  Visual comparison of saves,
+                  reviews and related community
+                  posts for the most engaged
+                  workspace units.
+                </p>
+              </div>
+
+              <div
+                class="analytics-chart-frame analytics-chart-frame-wide"
+              >
+                <canvas
+                  id="workspaceEngagementChart"
+                  aria-label="Bar chart comparing engagement across workspaces"
+                  role="img"
+                ></canvas>
+              </div>
+            </article>
+          </div>
+          
           <h3>
             Most Engaged Workspaces
           </h3>
@@ -1139,5 +1225,10 @@
     <script src="admin.js"></script>
     <script src="notifications-nav.js?v=1"></script>
     <script src="admin-social.js?v=1"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"
+    ></script>
+    
+    <script src="admin-visual-analytics.js"></script>
   </body>
 </html>
