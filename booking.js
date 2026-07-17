@@ -680,7 +680,7 @@
           p_branch_id:
             branchFilter.value === "all"
               ? null
-              : branchFilter.value
+              : branchFilter.value,
         }
       );
 
