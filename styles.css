@@ -4293,3 +4293,63 @@ main div[id] {
     min-height: 290px;
   }
 }
+
+/* --------------------------------------------------
+   Location target icon button
+-------------------------------------------------- */
+
+.location-filter-actions {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  align-content: end;
+  gap: 10px;
+}
+
+.location-target-button {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--teal-dark);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.location-target-button svg {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.location-target-button:hover,
+.location-target-button:focus-visible {
+  border-color: var(--teal);
+  color: white;
+  background: var(--teal);
+  transform: translateY(-1px);
+}
+
+.location-target-button:disabled {
+  border-color: #cfd8d3;
+  color: var(--muted);
+  background: #e6ece8;
+  cursor: wait;
+  transform: none;
+}
+
+.location-filter-actions .location-status {
+  min-width: 0;
+}
