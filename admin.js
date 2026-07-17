@@ -126,6 +126,9 @@
   const workspaceFormMessage =
     document.querySelector("#workspaceFormMessage");
 
+  const workspaceBranchId =
+    document.querySelector("#workspaceBranchId");
+
   const closeWorkspaceModalButton =
     document.querySelector("#closeWorkspaceModal");
 
@@ -181,6 +184,8 @@
   let bookingsById = new Map();
   let paymentsByBookingId = new Map();
   let refundsByBookingId = new Map();
+  let workspaceBranches = [];
+  let workspaceBranchesById = new Map();
 
   function assertRequiredElements() {
     const requiredElements = {
@@ -210,6 +215,7 @@
       workspaceFormTitle,
       workspaceExistingId,
       workspaceTypeId,
+      workspaceBranchId,
       workspaceUnitCode,
       workspaceName,
       workspaceDescription,
@@ -501,50 +507,72 @@
   function rebuildMaps() {
     profilesById =
       new Map(
-        profiles.map((profile) => [
-          profile.id,
-          profile
-        ])
+        profiles.map(
+          (profile) => [
+            profile.id,
+            profile
+          ]
+        )
       );
-
+  
     workspaceTypesById =
       new Map(
-        workspaceTypes.map((type) => [
-          type.id,
-          type
-        ])
+        workspaceTypes.map(
+          (type) => [
+            type.id,
+            type
+          ]
+        )
       );
-
+  
+    workspaceBranchesById =
+      new Map(
+        workspaceBranches.map(
+          (branch) => [
+            branch.id,
+            branch
+          ]
+        )
+      );
+  
     workspacesById =
       new Map(
-        workspaces.map((workspace) => [
-          workspace.id,
-          workspace
-        ])
+        workspaces.map(
+          (workspace) => [
+            workspace.id,
+            workspace
+          ]
+        )
       );
-
+  
     bookingsById =
       new Map(
-        bookings.map((booking) => [
-          booking.id,
-          booking
-        ])
+        bookings.map(
+          (booking) => [
+            booking.id,
+            booking
+          ]
+        )
       );
-
+  
     paymentsByBookingId =
       new Map(
-        payments.map((payment) => [
-          payment.booking_id,
-          payment
-        ])
+        payments.map(
+          (payment) => [
+            payment.booking_id,
+            payment
+          ]
+        )
       );
-
+  
     refundsByBookingId =
       new Map(
-        refunds.map((refund) => [
-          refund.booking_id,
-          refund
-        ])
+        refunds.map(
+          (refund) => [
+            refund.booking_id,
+            refund
+          ]
+        )
       );
   }
 
@@ -628,10 +656,11 @@
   async function fetchAdminData() {
     const client =
       getSupabaseClient();
-
+  
     const [
       profileResult,
       typeResult,
+      branchResult,
       workspaceResult,
       bookingResult,
       paymentResult,
@@ -647,7 +676,7 @@
           created_at
         `)
         .order("full_name"),
-
+  
       client
         .from("workspace_types")
         .select(`
@@ -659,12 +688,31 @@
           updated_at
         `)
         .order("name"),
-
+  
+      client
+        .from("workspace_branches")
+        .select(`
+          id,
+          name,
+          address,
+          city,
+          state,
+          active,
+          display_order
+        `)
+        .order(
+          "display_order",
+          {
+            ascending: true
+          }
+        ),
+  
       client
         .from("workspaces")
         .select(`
           id,
           workspace_type_id,
+          branch_id,
           unit_code,
           name,
           description,
@@ -687,7 +735,7 @@
             ascending: true
           }
         ),
-
+  
       client
         .from("bookings")
         .select(`
@@ -715,7 +763,7 @@
             ascending: false
           }
         ),
-
+  
       client
         .from("payments")
         .select(`
@@ -736,7 +784,7 @@
             ascending: false
           }
         ),
-
+  
       client
         .from("refunds")
         .select(`
@@ -760,43 +808,47 @@
           }
         )
     ]);
-
+  
     const results = [
       profileResult,
       typeResult,
+      branchResult,
       workspaceResult,
       bookingResult,
       paymentResult,
       refundResult
     ];
-
+  
     const failedResult =
       results.find(
         (result) => result.error
       );
-
+  
     if (failedResult) {
       throw failedResult.error;
     }
-
+  
     profiles =
       profileResult.data || [];
-
+  
     workspaceTypes =
       typeResult.data || [];
-
+  
+    workspaceBranches =
+      branchResult.data || [];
+  
     workspaces =
       workspaceResult.data || [];
-
+  
     bookings =
       bookingResult.data || [];
-
+  
     payments =
       paymentResult.data || [];
-
+  
     refunds =
       refundResult.data || [];
-
+  
     rebuildMaps();
   }
 
@@ -865,7 +917,48 @@
         })
         .join("");
   }
-
+  
+  function populateWorkspaceBranchOptions() {
+    workspaceBranchId.innerHTML = `
+      <option value="">
+        Select branch
+      </option>
+  
+      ${workspaceBranches
+        .map((branch) => {
+          const inactiveText =
+            branch.active
+              ? ""
+              : " (inactive)";
+  
+          return `
+            <option
+              value="${escapeHtml(
+                branch.id
+              )}"
+            >
+              ${escapeHtml(
+                branch.name +
+                inactiveText
+              )}
+            </option>
+          `;
+        })
+        .join("")}
+    `;
+  }
+  
+  function getWorkspaceBranchName(
+    workspace
+  ) {
+    return (
+      workspaceBranchesById.get(
+        workspace?.branch_id
+      )?.name ||
+      "Branch not assigned"
+    );
+  }
+  
   function renderInventory() {
     const search =
       normaliseSearch(
@@ -882,12 +975,16 @@
             workspace
           );
 
+        const branchName =
+          getWorkspaceBranchName(workspace);
+
         const searchableText =
           normaliseSearch(
             [
               workspace.name,
               workspace.unit_code,
               typeName,
+              branchName,
               workspace.description,
               workspace.layout
             ].join(" ")
@@ -920,6 +1017,11 @@
             .map((workspace) => {
               const typeName =
                 getWorkspaceTypeName(
+                  workspace
+                );
+
+              const branchName =
+                getWorkspaceBranchName(
                   workspace
                 );
 
@@ -959,6 +1061,16 @@
                           Unit
                           ${escapeHtml(
                             workspace.unit_code
+                          )}
+                        </p>
+
+                        <p>
+                          <strong>
+                            Branch:
+                          </strong>
+                        
+                          ${escapeHtml(
+                            branchName
                           )}
                         </p>
                       </div>
@@ -1872,6 +1984,8 @@
 
     populateWorkspaceTypeOptions();
 
+    populateWorkspaceBranchOptions();
+
     if (workspace) {
       workspaceFormTitle.textContent =
         "Edit workspace unit";
@@ -1881,7 +1995,10 @@
 
       workspaceTypeId.value =
         workspace.workspace_type_id;
-
+      
+      workspaceBranchId.value =
+        workspace.branch_id || "";
+      
       workspaceUnitCode.value =
         workspace.unit_code;
 
@@ -1923,6 +2040,11 @@
 
       workspaceExistingId.value = "";
 
+      workspaceBranchId.value =
+        workspaceBranches.find(
+          (branch) => branch.active
+        )?.id || "";
+      
       workspaceCapacity.value = "1";
       workspaceMorningPrice.value = "0";
       workspaceAfternoonPrice.value = "0";
@@ -2012,6 +2134,12 @@
         "Display order must be zero or higher."
       );
     }
+
+    if (!workspaceBranchId.value) {
+      throw new Error(
+        "Select a branch for this workspace."
+      );
+    }
   
     const morningPrice =
       readWorkspacePrice(
@@ -2040,6 +2168,9 @@
     return {
       workspace_type_id:
         workspaceTypeId.value,
+
+      branch_id:
+        workspaceBranchId.value,
   
       unit_code:
         workspaceUnitCode.value
