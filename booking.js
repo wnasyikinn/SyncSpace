@@ -163,20 +163,25 @@
     return {
       startDate:
         startDate.value,
-
+  
       endDate:
         endDate.value,
-
+  
       timeSlot:
         timeSlot.value,
-
+  
       roomType:
         roomType.value,
-
+  
       partySize:
         Number(
           peopleCount.value || 1
-        )
+        ),
+  
+      branchId:
+        branchFilter.value === "all"
+          ? null
+          : branchFilter.value
     };
   }
 
@@ -656,6 +661,28 @@
       </div>
     `;
 
+    console.log(
+      "Availability request:",
+      {
+        startDate:
+          search.startDate,
+    
+        endDate:
+          search.endDate,
+    
+        timeSlot:
+          search.timeSlot,
+    
+        roomType:
+          search.roomType,
+    
+        partySize:
+          search.partySize,
+    
+        branchId:
+          search.branchId
+      }
+    );
     const { data, error } =
       await getSupabaseClient().rpc(
         AVAILABILITY_RPC,
@@ -678,9 +705,7 @@
             search.partySize,
 
           p_branch_id:
-            branchFilter.value === "all"
-              ? null
-              : branchFilter.value
+            search.branchId
         }
       );
 
@@ -1045,6 +1070,13 @@
      * This checkbox only changes which existing cards
      * are displayed. It does not change availability.
      */
+    console.log(
+      "Filter changed:",
+      event.target.id,
+      "Selected branch:",
+      branchFilter.value
+    );
+    
     if (
       event.target ===
       availableOnly
