@@ -63,10 +63,28 @@
         
         <a
           href="notifications.html"
-          data-notification-link
-          style="display: none"
+          class="header-notification-link"
+          aria-label="Notifications"
+          title="Notifications"
         >
-          Notifications
+          <svg
+            class="header-notification-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"
+            />
+          </svg>
+        
+          <span
+            id="header-notification-badge"
+            class="header-notification-badge"
+            hidden
+          >
+            0
+          </span>
+        </a>
         
           <span
             class="notification-nav-count"
