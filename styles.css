@@ -4402,27 +4402,24 @@ main div[id] {
 }
 
 /* --------------------------------------------------
-   Header notification icon
+   Header notification icon and counter
 -------------------------------------------------- */
 
 .notification-nav-link {
-  position: relative;
-  display: inline-grid;
-  flex: 0 0 42px;
-  place-items: center;
-  width: 42px;
-  min-width: 42px;
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: auto;
+  min-width: 52px;
   height: 42px;
-  padding: 0;
+  padding: 0 5px;
   border: 1px solid transparent;
-  border-radius: 50%;
+  border-radius: 8px;
   color: var(--muted);
   background: transparent;
   line-height: 1;
-  transition:
-    color 160ms ease,
-    border-color 160ms ease,
-    background 160ms ease;
 }
 
 .notification-nav-link:hover,
@@ -4434,41 +4431,37 @@ main div[id] {
 
 .notification-nav-icon {
   display: block;
+  flex: 0 0 23px;
   width: 23px;
   height: 23px;
+  margin: 0;
   fill: none;
   pointer-events: none;
 }
 
-/*
- * Unread-count badge positioned over the
- * upper-right corner of the bell icon.
- */
 .notification-nav-link
 .notification-nav-count {
-  position: absolute;
-  top: -3px;
-  right: -4px;
-  display: inline-grid;
-  place-items: center;
-  min-width: 19px;
-  height: 19px;
+  position: static;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
   margin: 0;
-  padding: 0 5px;
-  border: 2px solid var(--paper);
+  padding: 0 6px;
+  border: 0;
   border-radius: 999px;
   color: #ffffff;
   background: var(--danger);
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   font-weight: 900;
   line-height: 1;
+  text-align: center;
+  transform: none;
   pointer-events: none;
 }
 
-/*
- * Retain the HTML hidden attribute until
- * notifications-nav.js reveals the badge.
- */
 .notification-nav-link
 .notification-nav-count[hidden] {
   display: none !important;
