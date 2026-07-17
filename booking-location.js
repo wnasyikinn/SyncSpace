@@ -23,6 +23,9 @@
   const roomStrip =
     document.querySelector("#roomStrip");
 
+  const roomCount =
+  document.querySelector("#roomCount");
+
   let branches = [];
 
   let branchById =
@@ -311,6 +314,7 @@
     ];
 
     let visibleCardCount = 0;
+    let visibleAvailableCount = 0;
 
     cards.forEach((card) => {
       const workspaceId =
@@ -339,20 +343,29 @@
         metadata.className =
           "room-branch-meta";
 
-        const actionContainer =
+        const cardBody =
           card.querySelector(
+            ".room-card-body"
+          ) || card;
+        
+        const actionContainer =
+          cardBody.querySelector(
             ".room-actions, " +
             ".room-card-actions, " +
             ".button-row"
           );
-
-        if (actionContainer) {
-          card.insertBefore(
-            metadata,
-            actionContainer
-          );
+        
+        if (
+          actionContainer &&
+          actionContainer.parentElement
+        ) {
+          actionContainer.parentElement
+            .insertBefore(
+              metadata,
+              actionContainer
+            );
         } else {
-          card.appendChild(metadata);
+          cardBody.appendChild(metadata);
         }
       }
 
@@ -378,9 +391,23 @@
 
       if (matchesBranch) {
         visibleCardCount += 1;
+      
+        if (
+          !card.classList.contains(
+            "is-unavailable"
+          )
+        ) {
+          visibleAvailableCount += 1;
+        }
       }
     });
-
+    
+    if (roomCount) {
+      roomCount.textContent =
+        `${visibleAvailableCount} available of ` +
+        `${visibleCardCount} matching workspaces`;
+    }
+    
     if (selectedBranchId === "all") {
       locationSummary.textContent =
         `Showing ${visibleCardCount} ` +
